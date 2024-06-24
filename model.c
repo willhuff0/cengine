@@ -33,7 +33,7 @@ static Material addMaterial(const char* dir, struct aiMaterial* aiMat) {
     initMaterial(&material);
 
     struct aiString path;
-    if (aiGetMaterialTexture(aiMat, aiTextureType_DIFFUSE,           0, &path, NULL, NULL, NULL, NULL, NULL, NULL) == aiReturn_SUCCESS) addTexture(&material.albedo, dir, path.data);
+    if (aiGetMaterialTexture(aiMat, aiTextureType_BASE_COLOR,           0, &path, NULL, NULL, NULL, NULL, NULL, NULL) == aiReturn_SUCCESS) addTexture(&material.albedo, dir, path.data);
     if (aiGetMaterialTexture(aiMat, aiTextureType_NORMALS,           0, &path, NULL, NULL, NULL, NULL, NULL, NULL) == aiReturn_SUCCESS) addTexture(&material.normal, dir, path.data);
     if (aiGetMaterialTexture(aiMat, aiTextureType_DIFFUSE_ROUGHNESS, 0, &path, NULL, NULL, NULL, NULL, NULL, NULL) == aiReturn_SUCCESS) addTexture(&material.roughness, dir, path.data);
     if (aiGetMaterialTexture(aiMat, aiTextureType_METALNESS,         0, &path, NULL, NULL, NULL, NULL, NULL, NULL) == aiReturn_SUCCESS) addTexture(&material.metallic, dir, path.data);
@@ -58,6 +58,14 @@ static Mesh* addMesh(const char* dir, const struct aiScene* aiScene, struct aiMe
         vertex.normal[0] = aiMesh->mNormals[i].x;
         vertex.normal[1] = aiMesh->mNormals[i].y;
         vertex.normal[2] = aiMesh->mNormals[i].z;
+
+        vertex.tangent[0] = aiMesh->mTangents[i].x;
+        vertex.tangent[1] = aiMesh->mTangents[i].y;
+        vertex.tangent[2] = aiMesh->mTangents[i].z;
+
+        vertex.tangent[0] = aiMesh->mBitangents[i].x;
+        vertex.tangent[1] = aiMesh->mBitangents[i].y;
+        vertex.tangent[2] = aiMesh->mBitangents[i].z;
 
         vertex.uv[0] = aiMesh->mTextureCoords[0][i].x;
         vertex.uv[1] = aiMesh->mTextureCoords[0][i].y;
@@ -87,6 +95,7 @@ bool createModel(Model** outModel, const char* dir, const char* path) {
                                             aiProcess_PreTransformVertices |
                                             aiProcess_JoinIdenticalVertices |
                                             aiProcess_FlipUVs |
+                                            aiProcess_CalcTangentSpace |
                                             aiProcess_GenNormals);
     if (aiScene == NULL) {
         fprintf(stderr, "[MESH] Failed to load assimp scene: %s\n", aiGetErrorString());

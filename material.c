@@ -13,9 +13,9 @@ void initMaterial(Material* material) {
 }
 
 void bindMaterial(const Material* material) {
-    if (material->albedo != NULL) bindTexture(material->albedo, 0);
-    if (material->normal != NULL) bindTexture(material->normal, 1);
-    if (material->roughness != NULL) bindTexture(material->roughness, 2);
-    if (material->metallic != NULL) bindTexture(material->metallic, 3);
-    if (material->ao != NULL) bindTexture(material->ao, 4);
+    if (material->albedo != NULL) bindTexture(material->albedo, GL_TEXTURE0);
+    if (material->normal != NULL) bindTexture(material->normal, GL_TEXTURE1);
+    if (material->roughness != NULL) bindTexture(material->roughness, GL_TEXTURE2);
+    if (material->metallic != NULL) bindTexture(material->metallic, GL_TEXTURE3);
+    if (material->ao != NULL) bindTexture(material->ao, GL_TEXTURE4);
 }

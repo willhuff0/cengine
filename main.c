@@ -11,17 +11,15 @@ int main(int argc, const char* argv[])
     createScene();
 
     ShaderProgram* shader;
-    if (!createShaderProgram(&shader, "C:\\Users\\wehuf\\CLionProjects\\cengine\\test\\pbr.vert", "C:\\Users\\wehuf\\CLionProjects\\cengine\\test\\pbr.frag")) {
+    if (!createShaderProgram(&shader, "C:\\Users\\wehuf\\CLionProjects\\cengine\\test\\standard.vert", "C:\\Users\\wehuf\\CLionProjects\\cengine\\test\\standard.frag")) {
         fprintf(stderr, "Failed to create shader asset.");
         exit(88);
     }
     bindShaderProgram(shader);
 
-    glUniform3f(3, 0, -0.5f, 0.5f); // DirectionalLightDirection
-    glUniform3f(4, 1.0f, 1.0f, 1.0f);
-    glUniform1f(5, 2.0f);
+    glUniform3f(3, 0.0f, 0.0f, 1.0f); // DirectionalLightDirection
 
-    if (!createModel(NULL, "C:\\Users\\wehuf\\CLionProjects\\cengine\\test\\glTF", "C:\\Users\\wehuf\\CLionProjects\\cengine\\test\\glTF\\AntiqueCamera.gltf")) {
+    if (!createModel(NULL, "C:\\Users\\wehuf\\CLionProjects\\cengine\\test\\glTF", "C:\\Users\\wehuf\\CLionProjects\\cengine\\test\\glTF\\BoomBox.gltf")) {
         fprintf(stderr, "Failed to create model asset.");
         exit(89);
     }

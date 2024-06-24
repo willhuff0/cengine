@@ -6,10 +6,8 @@
 
 #include <stdio.h>
 
+#include "fps_camera.h"
 #include "scene.h"
-
-// #include "model.h"
-// #include "scene.h"
 
 #define DEFAULT_WINDOW_WIDTH  1080
 #define DEFAULT_WINDOW_HEIGHT 768
@@ -69,25 +67,37 @@ void initEngine() {
     glfwSetFramebufferSizeCallback(window, glfw_FramebufferResizeCallback);
 
     glEnable(GL_DEPTH_TEST);
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClearColor(0.0f, 0.3f, 0.4f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     printEngineInfo();
 }
 
 void engineLoop() {
+    setupFpsCamera();
+
+    double lastTime = glfwGetTime();
+
     while(!glfwWindowShouldClose(engine.window)) {
         glfwPollEvents();
 
+        double time = glfwGetTime();
+        double deltaTime = time - lastTime;
+        lastTime = time;
+
+        tickFpsCamera(deltaTime);
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glUniform3f(2, 0.0f, 3.5f, 12.0f); // WorldViewPos
+        glUniform3f(2, scene.camera.position[0], scene.camera.position[1], scene.camera.position[2]); // WorldViewPos
 
         mat4 proj;
-        glm_perspective(glm_rad(45.0f), (float)engine.windowWidth / (float)engine.windowHeight, 0.1, 100.0, proj);
+        glm_perspective(glm_rad(70.0f), (float)engine.windowWidth / (float)engine.windowHeight, 0.1f, 100.0, proj);
+
         mat4 view;
-        glm_mat4_identity(view);
-        glm_translate(view, (vec3){0.0f, -3.5f, -12.0f});
+        mat4 lookTarget;
+        glm_vec3_add(scene.camera.position, scene.camera.forward, lookTarget);
+        glm_lookat(scene.camera.position, lookTarget, (vec3){0.0f, 1.0f, 0.0f}, view);
 
         mat4 viewProj;
         glm_mat4_mul(proj, view, viewProj);
@@ -96,7 +106,8 @@ void engineLoop() {
 
         mat4 trans;
         glm_mat4_identity(trans);
-        glm_rotate(trans, glm_rad(70.0f * glfwGetTime()), (vec3){0.0f, 1.0f, 0.0f});
+        glm_scale(trans, (vec3){50.0f, 50.0f, 50.0f});
+        glm_rotate(trans, glm_rad(45.0f * glfwGetTime()), (vec3){0.0f, 1.0f, 0.0f});
 
         glUniformMatrix4fv(1, 1, false, trans);
 

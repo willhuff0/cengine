@@ -11,6 +11,12 @@
 #include "texture.h"
 
 typedef struct {
+    vec3 position;
+    vec3 forward;
+} Camera;
+
+typedef struct {
+    Camera camera;
     Texture* textures;
     ShaderProgram* shaders;
     Mesh* meshes;

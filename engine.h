@@ -13,6 +13,8 @@ typedef struct {
     int windowHeight;
 } Engine;
 
+extern Engine engine;
+
 void initEngine();
 
 void engineLoop();

@@ -24,9 +24,13 @@ void createMesh(Mesh** outMesh, Material material, int64_t numVertices, Vertex* 
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(0, 3, GL_FLOAT, false, sizeof(Vertex), (void*)0); // Positions
-    glVertexAttribPointer(1, 3, GL_FLOAT, false, sizeof(Vertex), (void*)offsetof(Vertex, normal)); // Normals
-    glVertexAttribPointer(2, 2, GL_FLOAT, false, sizeof(Vertex), (void*)offsetof(Vertex, uv)); // UVs
+    glEnableVertexAttribArray(3);
+    glEnableVertexAttribArray(4);
+    glVertexAttribPointer(0, 3, GL_FLOAT, false, sizeof(Vertex), (void*)0);                           // Positions
+    glVertexAttribPointer(1, 3, GL_FLOAT, false, sizeof(Vertex), (void*)offsetof(Vertex, normal));    // Normals
+    glVertexAttribPointer(2, 3, GL_FLOAT, false, sizeof(Vertex), (void*)offsetof(Vertex, tangent));   // Tangents
+    glVertexAttribPointer(3, 3, GL_FLOAT, false, sizeof(Vertex), (void*)offsetof(Vertex, bitangent)); // Bitangents
+    glVertexAttribPointer(4, 2, GL_FLOAT, false, sizeof(Vertex), (void*)offsetof(Vertex, uv));        // UVs
 
     glBindVertexArray(0);
 

@@ -10,6 +10,8 @@ Scene scene;
 bool sceneIsLoaded = false;
 
 static void initScene() {
+    glm_vec3((vec3){0.0f, 0.0f, 3.0f}, scene.camera.position);
+    glm_vec3((vec3){0.0f, 0.0f, -1.0f}, scene.camera.forward);
     scene.textures = NULL;
     scene.shaders = NULL;
     scene.meshes = NULL;

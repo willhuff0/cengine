@@ -16,6 +16,8 @@ add_executable(cengine main.c
         texture.c
         model.c
         stbi_impl.c
+        fps_camera.c
+        fps_camera.h
 )
 
 target_include_directories(cengine PRIVATE ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/include/angle)
