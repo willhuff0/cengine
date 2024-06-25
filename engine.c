@@ -6,7 +6,6 @@
 
 #include <stdio.h>
 
-#include "fly_camera.h"
 #include "fps_player.h"
 #include "scene.h"
 
@@ -16,7 +15,6 @@
 Engine engine;
 
 static void printEngineInfo() {
-    printf("Engine version: 1.0.0\n");
     printf("GLFW version:   %s\n", glfwGetVersionString());
     printf("GL version:     %s\n", (char*)glGetString(GL_VERSION));
     printf("GL renderer:    %s\n", (char*)glGetString(GL_RENDERER));

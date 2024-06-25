@@ -11,15 +11,16 @@ add_executable(cengine main.c
         engine.c
         scene.c
         shader.c
-        mesh.c
-        material.c
+        simple_mesh.c
+        pbr_material.c
         texture.c
         model.c
         stbi_impl.c
         fly_camera.c
-        fly_camera.h
         fps_player.c
-        fps_player.h
+        bounds.c
+        debug.c
+        simple_material.h
 )
 
 target_include_directories(cengine PRIVATE ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/include/angle)
