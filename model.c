@@ -33,11 +33,21 @@ static Material addMaterial(const char* dir, struct aiMaterial* aiMat) {
     initMaterial(&material);
 
     struct aiString path;
-    if (aiGetMaterialTexture(aiMat, aiTextureType_BASE_COLOR,           0, &path, NULL, NULL, NULL, NULL, NULL, NULL) == aiReturn_SUCCESS) addTexture(&material.albedo, dir, path.data);
+
+    if (aiGetMaterialTexture(aiMat, aiTextureType_BASE_COLOR,        0, &path, NULL, NULL, NULL, NULL, NULL, NULL) == aiReturn_SUCCESS) addTexture(&material.albedo, dir, path.data);
+    else createTexture(&material.albedo, DEFAULT_ALBEDO_TEXTURE_PATH);
+
     if (aiGetMaterialTexture(aiMat, aiTextureType_NORMALS,           0, &path, NULL, NULL, NULL, NULL, NULL, NULL) == aiReturn_SUCCESS) addTexture(&material.normal, dir, path.data);
+    else createTexture(&material.normal, DEFAULT_NORMAL_TEXTURE_PATH);
+
     if (aiGetMaterialTexture(aiMat, aiTextureType_DIFFUSE_ROUGHNESS, 0, &path, NULL, NULL, NULL, NULL, NULL, NULL) == aiReturn_SUCCESS) addTexture(&material.roughness, dir, path.data);
+    else createTexture(&material.roughness, DEFAULT_ROUGHNESS_TEXTURE_PATH);
+
     if (aiGetMaterialTexture(aiMat, aiTextureType_METALNESS,         0, &path, NULL, NULL, NULL, NULL, NULL, NULL) == aiReturn_SUCCESS) addTexture(&material.metallic, dir, path.data);
+    else createTexture(&material.metallic, DEFAULT_METALLIC_TEXTURE_PATH);
+
     if (aiGetMaterialTexture(aiMat, aiTextureType_AMBIENT_OCCLUSION, 0, &path, NULL, NULL, NULL, NULL, NULL, NULL) == aiReturn_SUCCESS) addTexture(&material.ao, dir, path.data);
+    else createTexture(&material.ao, DEFAULT_AO_TEXTURE_PATH);
 
     return material;
 }

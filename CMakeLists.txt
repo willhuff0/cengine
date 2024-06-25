@@ -16,8 +16,10 @@ add_executable(cengine main.c
         texture.c
         model.c
         stbi_impl.c
-        fps_camera.c
-        fps_camera.h
+        fly_camera.c
+        fly_camera.h
+        fps_player.c
+        fps_player.h
 )
 
 target_include_directories(cengine PRIVATE ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/include/angle)
@@ -27,4 +29,5 @@ target_link_libraries(cengine PRIVATE
         ${PROJECT_SOURCE_DIR}/libs/win/libEGL.lib
         ${PROJECT_SOURCE_DIR}/libs/win/assimp-vc143-mtd.lib
         ${PROJECT_SOURCE_DIR}/libs/win/libcglm.a
+        ${PROJECT_SOURCE_DIR}/libs/win/libode_singlesd.a
 )

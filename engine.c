@@ -6,11 +6,12 @@
 
 #include <stdio.h>
 
-#include "fps_camera.h"
+#include "fly_camera.h"
+#include "fps_player.h"
 #include "scene.h"
 
-#define DEFAULT_WINDOW_WIDTH  1080
-#define DEFAULT_WINDOW_HEIGHT 768
+#define DEFAULT_WINDOW_WIDTH  1920/1.25
+#define DEFAULT_WINDOW_HEIGHT 1080/1.25
 
 Engine engine;
 
@@ -59,6 +60,9 @@ void initEngine() {
     }
     engine.window = window;
 
+    const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+    glfwSetWindowPos(window, mode->width / 2.0f - DEFAULT_WINDOW_WIDTH / 2.0f, mode->height / 2.0f - DEFAULT_WINDOW_HEIGHT / 2.0f);
+
     glfwMakeContextCurrent(window);
 
     glfwSwapInterval(1);
@@ -74,18 +78,20 @@ void initEngine() {
 }
 
 void engineLoop() {
-    setupFpsCamera();
+    setupFpsPlayer();
 
     double lastTime = glfwGetTime();
 
     while(!glfwWindowShouldClose(engine.window)) {
         glfwPollEvents();
 
+        if (glfwGetKey(engine.window, GLFW_KEY_ESCAPE) == GLFW_PRESS) glfwSetWindowShouldClose(engine.window, GLFW_TRUE);
+
         double time = glfwGetTime();
         double deltaTime = time - lastTime;
         lastTime = time;
 
-        tickFpsCamera(deltaTime);
+        tickFpsPlayer(deltaTime);
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -106,8 +112,9 @@ void engineLoop() {
 
         mat4 trans;
         glm_mat4_identity(trans);
-        glm_scale(trans, (vec3){50.0f, 50.0f, 50.0f});
-        glm_rotate(trans, glm_rad(45.0f * glfwGetTime()), (vec3){0.0f, 1.0f, 0.0f});
+        glm_translate(trans, (vec3){0.0f, -2.0f, 0.0f});
+        glm_scale(trans, (vec3){0.01f, 0.01f, 0.01f});
+        //glm_rotate(trans, glm_rad(45.0f * glfwGetTime()), (vec3){0.0f, 1.0f, 0.0f});
 
         glUniformMatrix4fv(1, 1, false, trans);
 

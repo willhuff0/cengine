@@ -17,9 +17,11 @@ int main(int argc, const char* argv[])
     }
     bindShaderProgram(shader);
 
-    glUniform3f(3, 0.0f, 0.0f, 1.0f); // DirectionalLightDirection
+    vec3 directionalLightDirection = {0.5f, -1.0f, 0.5f};
+    glm_normalize(directionalLightDirection);
+    glUniform3f(3, directionalLightDirection[0], directionalLightDirection[1], directionalLightDirection[2]); // DirectionalLightDirection
 
-    if (!createModel(NULL, "C:\\Users\\wehuf\\CLionProjects\\cengine\\test\\glTF", "C:\\Users\\wehuf\\CLionProjects\\cengine\\test\\glTF\\BoomBox.gltf")) {
+    if (!createModel(NULL, "C:\\Users\\wehuf\\CLionProjects\\cengine\\test", "C:\\Users\\wehuf\\CLionProjects\\cengine\\test\\environment.fbx")) {
         fprintf(stderr, "Failed to create model asset.");
         exit(89);
     }
