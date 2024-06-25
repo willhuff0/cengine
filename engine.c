@@ -8,6 +8,7 @@
 
 #include "fly_camera.h"
 #include "fps_player.h"
+#include "particle.h"
 #include "scene.h"
 
 #define DEFAULT_WINDOW_WIDTH  1920/1.25
@@ -77,9 +78,14 @@ void initEngine() {
     printEngineInfo();
 }
 
-void engineLoop() {
-    setupFpsPlayer();
+FrameInfo frameInfo;
 
+void engineLoop() {
+    setupFlyCamera();
+    initParticles();
+
+    double lastFPSCounterTime = glfwGetTime();
+    int nbFrames = 0;
     double lastTime = glfwGetTime();
 
     while(!glfwWindowShouldClose(engine.window)) {
@@ -87,18 +93,28 @@ void engineLoop() {
 
         if (glfwGetKey(engine.window, GLFW_KEY_ESCAPE) == GLFW_PRESS) glfwSetWindowShouldClose(engine.window, GLFW_TRUE);
 
+        double currentTime = glfwGetTime();
+        nbFrames++;
+        if ( currentTime - lastFPSCounterTime >= 1.0 ){ // If last prinf() was more than 1 sec ago
+            // printf and reset timer
+            printf("%d FPS\n", nbFrames);
+            nbFrames = 0;
+            lastFPSCounterTime += 1.0;
+        }
+
         double time = glfwGetTime();
         double deltaTime = time - lastTime;
         lastTime = time;
 
-        tickFpsPlayer(deltaTime);
+        tickFlyCamera(deltaTime);
+        tickParticles(deltaTime);
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glUniform3f(2, scene.camera.position[0], scene.camera.position[1], scene.camera.position[2]); // WorldViewPos
 
         mat4 proj;
-        glm_perspective(glm_rad(70.0f), (float)engine.windowWidth / (float)engine.windowHeight, 0.1f, 100.0, proj);
+        glm_perspective(glm_rad(70.0f), (float)engine.windowWidth / (float)engine.windowHeight, 0.1f, 1000.0, proj);
 
         mat4 view;
         mat4 lookTarget;
@@ -108,20 +124,15 @@ void engineLoop() {
         mat4 viewProj;
         glm_mat4_mul(proj, view, viewProj);
 
-        glUniformMatrix4fv(0, 1, false, viewProj);
+        frameInfo.delta = deltaTime;
+        glm_mat4_copy(viewProj, frameInfo.viewProjMat);
 
-        mat4 trans;
-        glm_mat4_identity(trans);
-        glm_translate(trans, (vec3){0.0f, -2.0f, 0.0f});
-        glm_scale(trans, (vec3){0.01f, 0.01f, 0.01f});
-        //glm_rotate(trans, glm_rad(45.0f * glfwGetTime()), (vec3){0.0f, 1.0f, 0.0f});
-
-        glUniformMatrix4fv(1, 1, false, trans);
-
-        if (sceneIsLoaded) drawModel(scene.models);
+        drawParticles();
 
         glfwSwapBuffers(engine.window);
     }
+
+    freeParticles();
 }
 
 void freeEngine() {

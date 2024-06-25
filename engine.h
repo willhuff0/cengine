@@ -13,7 +13,13 @@ typedef struct {
     int windowHeight;
 } Engine;
 
+typedef struct {
+    float delta;
+    mat4 viewProjMat;
+} FrameInfo;
+
 extern Engine engine;
+extern FrameInfo frameInfo;
 
 void initEngine();
 

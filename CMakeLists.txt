@@ -20,6 +20,8 @@ add_executable(cengine main.c
         fly_camera.h
         fps_player.c
         fps_player.h
+        particle.c
+        particle.h
 )
 
 target_include_directories(cengine PRIVATE ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/include/angle)
