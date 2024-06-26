@@ -5,10 +5,11 @@
 #ifndef SCENE_H
 #define SCENE_H
 
-#include "mesh.h"
-#include "model.h"
-#include "shader.h"
+#include "common.h"
 #include "texture.h"
+#include "pbr_mesh.h"
+#include "simple_mesh.h"
+#include "simple_material.h"
 
 typedef struct {
     vec3 position;
@@ -19,15 +20,17 @@ typedef struct {
     Camera camera;
     Texture* textures;
     ShaderProgram* shaders;
-    Mesh* meshes;
-    Model* models;
+    SimpleMaterial* simpleMaterials;
+    SimpleMesh* simpleMeshes;
+    PbrMaterial* pbrMaterials;
+    PbrMesh* pbrMeshes;
 } Scene;
 
 extern Scene scene;
 extern bool sceneIsLoaded;
 
 void createScene();
-void loadScene(const char* path);
+//void loadScene(const char* path);
 void unloadScene();
 
 #endif //SCENE_H

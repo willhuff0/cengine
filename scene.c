@@ -4,8 +4,6 @@
 
 #include "scene.h"
 
-#include <stdio.h>
-
 Scene scene;
 bool sceneIsLoaded = false;
 
@@ -14,8 +12,10 @@ static void initScene() {
     glm_vec3((vec3){0.0f, 0.0f, -1.0f}, scene.camera.forward);
     scene.textures = NULL;
     scene.shaders = NULL;
-    scene.meshes = NULL;
-    scene.models = NULL;
+    scene.simpleMaterials = NULL;
+    scene.simpleMeshes = NULL;
+    scene.pbrMaterials = NULL;
+    scene.pbrMeshes = NULL;
 }
 
 // typedef enum {
@@ -120,15 +120,25 @@ void unloadScene() {
     }
     arrfree(scene.shaders);
 
-    for (int i = 0; i < arrlen(scene.meshes); ++i) {
-        deleteMesh(&scene.meshes[i]);
+    for (int i = 0; i < arrlen(scene.simpleMaterials); ++i) {
+        deleteSimpleMaterial(&scene.simpleMaterials[i]);
     }
-    arrfree(scene.meshes);
+    arrfree(scene.simpleMaterials);
 
-    for (int i = 0; i < arrlen(scene.models); ++i) {
-        deleteModel(&scene.models[i]);
+    for (int i = 0; i < arrlen(scene.simpleMeshes); ++i) {
+        deleteSimpleMesh(&scene.simpleMeshes[i]);
     }
-    arrfree(scene.models);
+    arrfree(scene.simpleMeshes);
+
+    for (int i = 0; i < arrlen(scene.pbrMaterials); ++i) {
+        deletePbrMaterial(&scene.pbrMaterials[i]);
+    }
+    arrfree(scene.pbrMaterials);
+
+    for (int i = 0; i < arrlen(scene.pbrMeshes); ++i) {
+        deletePbrMesh(&scene.pbrMeshes[i]);
+    }
+    arrfree(scene.pbrMeshes);
 
     initScene();
 }

@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "engine.h"
 #include "scene.h"
 
 static void printShaderInfoLog(GLuint shader, GLenum type) {

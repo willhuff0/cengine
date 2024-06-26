@@ -10,8 +10,10 @@
 void initDebug();
 void freeDebug();
 
-void debugDrawPixel(vec3 pos, float size = 3.0f);
-void debugDrawSphere(vec3 pos, float radius = 1.0f);
-void debugDrawVolume(vec3 center, vec3 extent);
+void debugDrawPoint(vec3 pos, float pixelSize, vec3 color);
+void debugDrawSphere(vec3 pos, float radius, vec3 color);
+void debugDrawVolume(vec3 center, vec3 extent, vec3 color);
+
+void debugRenderFrame();
 
 #endif //DEBUG_H

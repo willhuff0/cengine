@@ -20,7 +20,8 @@ add_executable(cengine main.c
         fps_player.c
         bounds.c
         debug.c
-        simple_material.h
+        simple_material.c
+        pbr_mesh.c
 )
 
 target_include_directories(cengine PRIVATE ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/include/angle)

@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 
+#include "debug.h"
 #include "fps_player.h"
 #include "scene.h"
 
@@ -72,14 +73,43 @@ void initEngine() {
     glClearColor(0.0f, 0.3f, 0.4f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    glGenBuffers(1, &engine.cengineUbo);
+    glBindBuffer(GL_UNIFORM_BUFFER, engine.cengineUbo);
+    glBufferData(GL_UNIFORM_BUFFER, sizeof(mat4), NULL, GL_STATIC_DRAW);
+    glBindBufferBase(GL_UNIFORM_BUFFER, 0, engine.cengineUbo);
+
     printEngineInfo();
 }
 
+static void makeViewProjMat(mat4 viewProjMat) {
+    mat4 proj;
+    glm_perspective(glm_rad(70.0f), (float)engine.windowWidth / (float)engine.windowHeight, 0.1f, 100.0, proj);
+
+    mat4 lookTarget;
+    glm_vec3_add(scene.camera.position, scene.camera.forward, lookTarget);
+    mat4 view;
+    glm_lookat(scene.camera.position, lookTarget, (vec3){0.0f, 1.0f, 0.0f}, view);
+
+    glm_mat4_mul(proj, view, viewProjMat);
+}
+
+FrameArgs frameArgs;
+
+static void tick() {
+    tickFpsPlayer(frameArgs.deltaTime);
+}
+
+static void renderFrame() {
+    drawSimpleMesh(&scene.simpleMeshes[0]);
+    debugRenderFrame();
+}
+
 void engineLoop() {
+    initDebug();
+
     setupFpsPlayer();
 
     double lastTime = glfwGetTime();
-
     while(!glfwWindowShouldClose(engine.window)) {
         glfwPollEvents();
 
@@ -89,37 +119,26 @@ void engineLoop() {
         double deltaTime = time - lastTime;
         lastTime = time;
 
-        tickFpsPlayer(deltaTime);
+        frameArgs = (FrameArgs) {time, deltaTime};
+        makeViewProjMat(frameArgs.viewProjMat);
+
+        tick();
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glUniform3f(2, scene.camera.position[0], scene.camera.position[1], scene.camera.position[2]); // WorldViewPos
+        glBindBuffer(GL_UNIFORM_BUFFER, engine.cengineUbo);
+        glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(mat4), frameArgs.viewProjMat);
 
-        mat4 proj;
-        glm_perspective(glm_rad(70.0f), (float)engine.windowWidth / (float)engine.windowHeight, 0.1f, 100.0, proj);
+        debugDrawPoint((vec3){0.0f, 3.0f, 0.0f}, 3.0f, (vec3){1.0f, 0.0f, 0.0f});
+        debugDrawPoint((vec3){3.0f, 0.0f, 0.0f}, 50.0f, (vec3){1.0f, 0.0f, 0.0f});
+        debugDrawPoint((vec3){0.0f, 3.0f, 0.0f}, 100.0f, (vec3){1.0f, 0.0f, 0.0f});
 
-        mat4 view;
-        mat4 lookTarget;
-        glm_vec3_add(scene.camera.position, scene.camera.forward, lookTarget);
-        glm_lookat(scene.camera.position, lookTarget, (vec3){0.0f, 1.0f, 0.0f}, view);
-
-        mat4 viewProj;
-        glm_mat4_mul(proj, view, viewProj);
-
-        glUniformMatrix4fv(0, 1, false, viewProj);
-
-        mat4 trans;
-        glm_mat4_identity(trans);
-        glm_translate(trans, (vec3){0.0f, -2.0f, 0.0f});
-        glm_scale(trans, (vec3){0.01f, 0.01f, 0.01f});
-        //glm_rotate(trans, glm_rad(45.0f * glfwGetTime()), (vec3){0.0f, 1.0f, 0.0f});
-
-        glUniformMatrix4fv(1, 1, false, trans);
-
-        if (sceneIsLoaded) drawModel(scene.models);
+        renderFrame();
 
         glfwSwapBuffers(engine.window);
     }
+
+    freeDebug();
 }
 
 void freeEngine() {

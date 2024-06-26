@@ -2,14 +2,17 @@
 // Created by wehuf on 6/23/2024.
 //
 
-#ifndef MATERIAL_H
-#define MATERIAL_H
+#ifndef SIMPLE_MATERIAL_H
+#define SIMPLE_MATERIAL_H
+
+#include "shader.h"
 
 typedef struct {
-    ShaderProgram*
+    ShaderProgram* shader;
 } SimpleMaterial;
 
-void initSimpleMaterial(SimpleMaterial* material);
+void createSimpleMaterial(SimpleMaterial** outMaterial, ShaderProgram* shader);
 void bindSimpleMaterial(const SimpleMaterial* material);
+void deleteSimpleMaterial(SimpleMaterial* material);
 
-#endif //MATERIAL_H
+#endif //SIMPLE_MATERIAL_H

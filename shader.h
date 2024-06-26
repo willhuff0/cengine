@@ -7,6 +7,10 @@
 
 #include "common.h"
 
+#define DEFAULT_SHADER_SIMPLE "C:\\Users\\wehuf\\CLionProjects\\cengine\\defaults\\shaders\\simple.vert", "C:\\Users\\wehuf\\CLionProjects\\cengine\\defaults\\shaders\\simple.frag"
+#define DEFAULT_SHADER_SIMPLE_INSTANCED "C:\\Users\\wehuf\\CLionProjects\\cengine\\defaults\\shaders\\simple_instanced.vert", "C:\\Users\\wehuf\\CLionProjects\\cengine\\defaults\\shaders\\simple_instanced.frag"
+#define DEFAULT_SHADER_POINTS_INSTANCED "C:\\Users\\wehuf\\CLionProjects\\cengine\\defaults\\shaders\\points_instanced.vert", "C:\\Users\\wehuf\\CLionProjects\\cengine\\defaults\\shaders\\simple_instanced.frag"
+
 typedef struct {
     GLuint program;
 } ShaderProgram;

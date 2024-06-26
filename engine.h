@@ -11,9 +11,17 @@ typedef struct {
     GLFWwindow* window;
     int windowWidth;
     int windowHeight;
+    GLuint cengineUbo;
 } Engine;
 
+typedef struct {
+    float time;
+    float deltaTime;
+    mat4 viewProjMat;
+} FrameArgs;
+
 extern Engine engine;
+extern FrameArgs frameArgs;
 
 void initEngine();
 

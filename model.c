@@ -9,8 +9,78 @@
 #include <assimp/postprocess.h>
 
 #include "common.h"
-#include "mesh.h"
 #include "scene.h"
+
+static SimpleMesh* addSimpleMesh(SimpleMaterial* material, struct aiMesh* aiMesh) {
+    SimpleVertex* vertices = malloc(aiMesh->mNumVertices * sizeof(SimpleVertex));
+    unsigned int* indices = malloc(aiMesh->mNumFaces * 3 * sizeof(unsigned int));
+
+    for (unsigned int i = 0; i < aiMesh->mNumVertices; ++i) {
+        SimpleVertex vertex;
+
+        vertex.position[0] = aiMesh->mVertices[i].x;
+        vertex.position[1] = aiMesh->mVertices[i].y;
+        vertex.position[2] = aiMesh->mVertices[i].z;
+
+        vertex.normal[0] = aiMesh->mNormals[i].x;
+        vertex.normal[1] = aiMesh->mNormals[i].y;
+        vertex.normal[2] = aiMesh->mNormals[i].z;
+
+        vertices[i] = vertex;
+    }
+
+    for (unsigned int i = 0; i < aiMesh->mNumFaces; ++i) {
+        struct aiFace face = aiMesh->mFaces[i];
+        indices[i * 3 + 0] = face.mIndices[0];
+        indices[i * 3 + 1] = face.mIndices[1];
+        indices[i * 3 + 2] = face.mIndices[2];
+    }
+
+    SimpleMesh* mesh;
+    createSimpleMesh(&mesh, material, aiMesh->mNumVertices, vertices, aiMesh->mNumFaces * 3, indices);
+
+    free(vertices);
+    free(indices);
+
+    return mesh;
+}
+
+bool loadSimpleModel(SimpleModel* outModel, ShaderProgram* shader, const char* path) {
+    const struct aiScene* aiScene = aiImportFile(path,
+                                            aiProcess_Triangulate |
+                                            aiProcess_PreTransformVertices |
+                                            aiProcess_JoinIdenticalVertices |
+                                            aiProcess_FlipUVs |
+                                            aiProcess_GenNormals);
+    if (aiScene == NULL) {
+        fprintf(stderr, "[MESH] Failed to load assimp scene: %s\n", aiGetErrorString());
+        return false;
+    }
+    if (aiScene->mNumMeshes < 1) {
+        fprintf(stderr, "[MESH] assimp scene has no meshes: %s\n", path);
+        return false;
+    }
+
+    SimpleMaterial* material;
+    createSimpleMaterial(&material, shader);
+
+    SimpleModel model;
+    model.numMeshes = aiScene->mNumMeshes;
+    model.meshes = malloc(aiScene->mNumMeshes * sizeof(SimpleMesh*));
+
+    for (int i = 0; i < aiScene->mNumMeshes; ++i) {
+        model.meshes[i] = addSimpleMesh(material, aiScene->mMeshes[i]);
+    }
+
+    aiReleaseImport(aiScene);
+
+    *outModel = model;
+    return true;
+}
+
+void freeSimpleModel(SimpleModel* model) {
+    free(model->meshes);
+}
 
 static void addTexture(Texture** texture, const char* dir, const char* path) {
     int dirLen = strlen(dir);
@@ -28,38 +98,38 @@ static void addTexture(Texture** texture, const char* dir, const char* path) {
     free(absolutePath);
 }
 
-static Material addMaterial(const char* dir, struct aiMaterial* aiMat) {
-    Material material;
-    initMaterial(&material);
+static PbrMaterial* addPbrMaterial(ShaderProgram* shader, const char* dir, struct aiMaterial* aiMat) {
+    PbrMaterial* material;
+    createPbrMaterial(&material, shader);
 
     struct aiString path;
 
-    if (aiGetMaterialTexture(aiMat, aiTextureType_BASE_COLOR,        0, &path, NULL, NULL, NULL, NULL, NULL, NULL) == aiReturn_SUCCESS) addTexture(&material.albedo, dir, path.data);
-    else createTexture(&material.albedo, DEFAULT_ALBEDO_TEXTURE_PATH);
+    if (aiGetMaterialTexture(aiMat, aiTextureType_BASE_COLOR,        0, &path, NULL, NULL, NULL, NULL, NULL, NULL) == aiReturn_SUCCESS) addTexture(&material->albedo, dir, path.data);
+    else createTexture(&material->albedo, DEFAULT_ALBEDO_TEXTURE_PATH);
 
-    if (aiGetMaterialTexture(aiMat, aiTextureType_NORMALS,           0, &path, NULL, NULL, NULL, NULL, NULL, NULL) == aiReturn_SUCCESS) addTexture(&material.normal, dir, path.data);
-    else createTexture(&material.normal, DEFAULT_NORMAL_TEXTURE_PATH);
+    if (aiGetMaterialTexture(aiMat, aiTextureType_NORMALS,           0, &path, NULL, NULL, NULL, NULL, NULL, NULL) == aiReturn_SUCCESS) addTexture(&material->normal, dir, path.data);
+    else createTexture(&material->normal, DEFAULT_NORMAL_TEXTURE_PATH);
 
-    if (aiGetMaterialTexture(aiMat, aiTextureType_DIFFUSE_ROUGHNESS, 0, &path, NULL, NULL, NULL, NULL, NULL, NULL) == aiReturn_SUCCESS) addTexture(&material.roughness, dir, path.data);
-    else createTexture(&material.roughness, DEFAULT_ROUGHNESS_TEXTURE_PATH);
+    if (aiGetMaterialTexture(aiMat, aiTextureType_DIFFUSE_ROUGHNESS, 0, &path, NULL, NULL, NULL, NULL, NULL, NULL) == aiReturn_SUCCESS) addTexture(&material->roughness, dir, path.data);
+    else createTexture(&material->roughness, DEFAULT_ROUGHNESS_TEXTURE_PATH);
 
-    if (aiGetMaterialTexture(aiMat, aiTextureType_METALNESS,         0, &path, NULL, NULL, NULL, NULL, NULL, NULL) == aiReturn_SUCCESS) addTexture(&material.metallic, dir, path.data);
-    else createTexture(&material.metallic, DEFAULT_METALLIC_TEXTURE_PATH);
+    if (aiGetMaterialTexture(aiMat, aiTextureType_METALNESS,         0, &path, NULL, NULL, NULL, NULL, NULL, NULL) == aiReturn_SUCCESS) addTexture(&material->metallic, dir, path.data);
+    else createTexture(&material->metallic, DEFAULT_METALLIC_TEXTURE_PATH);
 
-    if (aiGetMaterialTexture(aiMat, aiTextureType_AMBIENT_OCCLUSION, 0, &path, NULL, NULL, NULL, NULL, NULL, NULL) == aiReturn_SUCCESS) addTexture(&material.ao, dir, path.data);
-    else createTexture(&material.ao, DEFAULT_AO_TEXTURE_PATH);
+    if (aiGetMaterialTexture(aiMat, aiTextureType_AMBIENT_OCCLUSION, 0, &path, NULL, NULL, NULL, NULL, NULL, NULL) == aiReturn_SUCCESS) addTexture(&material->ao, dir, path.data);
+    else createTexture(&material->ao, DEFAULT_AO_TEXTURE_PATH);
 
     return material;
 }
 
-static Mesh* addMesh(const char* dir, const struct aiScene* aiScene, struct aiMesh* aiMesh) {
-    Material material = addMaterial(dir, aiScene->mMaterials[aiMesh->mMaterialIndex]);
+static PbrMesh* addPbrMesh(ShaderProgram* shader, const char* dir, const struct aiScene* aiScene, struct aiMesh* aiMesh) {
+    PbrMaterial* material = addPbrMaterial(shader, dir, aiScene->mMaterials[aiMesh->mMaterialIndex]);
 
-    Vertex* vertices = malloc(aiMesh->mNumVertices * sizeof(Vertex));
+    PbrVertex* vertices = malloc(aiMesh->mNumVertices * sizeof(PbrVertex));
     unsigned int* indices = malloc(aiMesh->mNumFaces * 3 * sizeof(unsigned int));
 
     for (unsigned int i = 0; i < aiMesh->mNumVertices; ++i) {
-        Vertex vertex;
+        PbrVertex vertex;
 
         vertex.position[0] = aiMesh->mVertices[i].x;
         vertex.position[1] = aiMesh->mVertices[i].y;
@@ -90,8 +160,8 @@ static Mesh* addMesh(const char* dir, const struct aiScene* aiScene, struct aiMe
         indices[i * 3 + 2] = face.mIndices[2];
     }
 
-    Mesh* mesh;
-    createMesh(&mesh, material, aiMesh->mNumVertices, vertices, aiMesh->mNumFaces * 3, indices);
+    PbrMesh* mesh;
+    createPbrMesh(&mesh, material, aiMesh->mNumVertices, vertices, aiMesh->mNumFaces * 3, indices);
 
     free(vertices);
     free(indices);
@@ -99,7 +169,7 @@ static Mesh* addMesh(const char* dir, const struct aiScene* aiScene, struct aiMe
     return mesh;
 }
 
-bool createModel(Model** outModel, const char* dir, const char* path) {
+bool loadPbrModel(PbrModel* outModel, ShaderProgram* shader, const char* dir, const char* path) {
     const struct aiScene* aiScene = aiImportFile(path,
                                             aiProcess_Triangulate |
                                             aiProcess_PreTransformVertices |
@@ -116,26 +186,20 @@ bool createModel(Model** outModel, const char* dir, const char* path) {
         return false;
     }
 
-    Model* model = arraddnptr(scene.models, 1);
-    model->numMeshes = aiScene->mNumMeshes;
-    model->meshes = malloc(aiScene->mNumMeshes * sizeof(Mesh*));
+    PbrModel model;
+    model.numMeshes = aiScene->mNumMeshes;
+    model.meshes = malloc(aiScene->mNumMeshes * sizeof(PbrMesh*));
 
     for (int i = 0; i < aiScene->mNumMeshes; ++i) {
-        model->meshes[i] = addMesh(dir, aiScene, aiScene->mMeshes[i]);
+        model.meshes[i] = addPbrMesh(shader, dir, aiScene, aiScene->mMeshes[i]);
     }
 
     aiReleaseImport(aiScene);
 
-    if (outModel != NULL) *outModel = model;
+    *outModel = model;
     return true;
 }
 
-void deleteModel(Model* model) {
+void freePbrModel(PbrModel* model) {
     free(model->meshes);
-}
-
-void drawModel(Model* model) {
-    for (int i = 0; i < model->numMeshes; ++i) {
-        drawMesh(model->meshes[i]);
-    }
 }

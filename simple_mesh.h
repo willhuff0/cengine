@@ -2,30 +2,30 @@
 // Created by wehuf on 6/23/2024.
 //
 
-#ifndef MESH_H
-#define MESH_H
+#ifndef SIMPLE_MESH_H
+#define SIMPLE_MESH_H
 
 #include "common.h"
-#include "material.h"
+#include "simple_material.h"
 
 typedef struct {
     vec3 position;
     vec3 normal;
-} Vertex;
+} SimpleVertex;
 
 typedef struct {
-    Material* material;
+    SimpleMaterial* material;
 
     int numIndices;
     GLuint vao;
     GLuint vbo;
     GLuint ebo;
-} Mesh;
+} SimpleMesh;
 
-void createMesh(Mesh** mesh, Material material, int64_t numVertices, Vertex* vertices, int64_t numIndices, unsigned int* indices);
-void deleteMesh(Mesh* mesh);
+void createSimpleMesh(SimpleMesh** mesh, SimpleMaterial* material, int64_t numVertices, SimpleVertex* vertices, int64_t numIndices, unsigned int* indices);
+void deleteSimpleMesh(SimpleMesh* mesh);
 
-void bindMesh(Mesh* mesh);
-void drawMesh(Mesh* mesh);
+//void bindSimpleMesh(SimpleMesh* mesh);
+void drawSimpleMesh(SimpleMesh* mesh);
 
-#endif //MESH_H
+#endif //SIMPLE_MESH_H

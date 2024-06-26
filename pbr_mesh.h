@@ -2,11 +2,11 @@
 // Created by wehuf on 6/23/2024.
 //
 
-#ifndef MESH_H
-#define MESH_H
+#ifndef PBR_MESH_H
+#define PBR_MESH_H
 
 #include "common.h"
-#include "material.h"
+#include "pbr_material.h"
 
 typedef struct {
     vec3 position;
@@ -14,21 +14,21 @@ typedef struct {
     vec3 tangent;
     vec3 bitangent;
     vec2 uv;
-} Vertex;
+} PbrVertex;
 
 typedef struct {
-    Material material;
+    PbrMaterial* material;
 
     int numIndices;
     GLuint vao;
     GLuint vbo;
     GLuint ebo;
-} Mesh;
+} PbrMesh;
 
-void createMesh(Mesh** mesh, Material material, int64_t numVertices, Vertex* vertices, int64_t numIndices, unsigned int* indices);
-void deleteMesh(Mesh* mesh);
+void createPbrMesh(PbrMesh** outMesh, PbrMaterial* material, int64_t numVertices, PbrVertex* vertices, int64_t numIndices, unsigned int* indices);
+void deletePbrMesh(PbrMesh* mesh);
 
-void bindMesh(Mesh* mesh);
-void drawMesh(Mesh* mesh);
+//void bindPbrMesh(PbrMesh* mesh);
+void drawPrbMesh(PbrMesh* mesh);
 
-#endif //MESH_H
+#endif //PBR_MESH_H

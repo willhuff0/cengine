@@ -2,20 +2,24 @@
 // Created by wehuf on 6/23/2024.
 //
 
-#ifndef MATERIAL_H
-#define MATERIAL_H
+#ifndef PBR_MATERIAL_H
+#define PBR_MATERIAL_H
 
+#include "shader.h"
 #include "texture.h"
 
 typedef struct {
+    ShaderProgram* shader;
+
     Texture* albedo;
     Texture* normal;
     Texture* roughness;
     Texture* metallic;
     Texture* ao;
-} Material;
+} PbrMaterial;
 
-void initMaterial(Material* material);
-void bindMaterial(const Material* material);
+void createPbrMaterial(PbrMaterial** outMaterial, ShaderProgram* shader);
+void bindPbrMaterial(const PbrMaterial* material);
+void deletePbrMaterial(PbrMaterial* material);
 
-#endif //MATERIAL_H
+#endif //PBR_MATERIAL_H

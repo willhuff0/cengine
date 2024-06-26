@@ -6,7 +6,7 @@
 
 #include "scene.h"
 
-void createMesh(Mesh** outMesh, Material* material, int64_t numVertices, Vertex* vertices, int64_t numIndices, unsigned int* indices) {
+void createSimpleMesh(SimpleMesh** outMesh, SimpleMaterial* material, int64_t numVertices, SimpleVertex* vertices, int64_t numIndices, unsigned int* indices) {
     GLuint vao;
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
@@ -14,7 +14,7 @@ void createMesh(Mesh** outMesh, Material* material, int64_t numVertices, Vertex*
     GLuint vbo;
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, numVertices * sizeof(Vertex), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, numVertices * sizeof(SimpleVertex), vertices, GL_STATIC_DRAW);
 
     GLuint ebo;
     glGenBuffers(1, &ebo);
@@ -23,12 +23,12 @@ void createMesh(Mesh** outMesh, Material* material, int64_t numVertices, Vertex*
 
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(0, 3, GL_FLOAT, false, sizeof(Vertex), (void*)0);                           // Positions
-    glVertexAttribPointer(1, 3, GL_FLOAT, false, sizeof(Vertex), (void*)offsetof(Vertex, normal));    // Normals
+    glVertexAttribPointer(0, 3, GL_FLOAT, false, sizeof(SimpleVertex), (void*)0);                                 // Positions
+    glVertexAttribPointer(1, 3, GL_FLOAT, false, sizeof(SimpleVertex), (void*)offsetof(SimpleVertex, normal));    // Normals
 
     glBindVertexArray(0);
 
-    Mesh* mesh = arraddnptr(scene.meshes, 1);
+    SimpleMesh* mesh = arraddnptr(scene.simpleMeshes, 1);
     mesh->material = material;
     mesh->vao = vao;
     mesh->vbo = vbo;
@@ -37,18 +37,23 @@ void createMesh(Mesh** outMesh, Material* material, int64_t numVertices, Vertex*
     if (outMesh != NULL) *outMesh = mesh;
 }
 
-void deleteMesh(Mesh* mesh) {
+void deleteSimpleMesh(SimpleMesh* mesh) {
     glDeleteVertexArrays(1, &mesh->vao);
     glDeleteBuffers(1, &mesh->vbo);
     glDeleteBuffers(1, &mesh->ebo);
 }
 
-void bindMesh(Mesh* mesh) {
+static void bindSimpleMesh(SimpleMesh* mesh) {
     glBindVertexArray(mesh->vao);
-    bindMaterial(&mesh->material);
+    bindSimpleMaterial(mesh->material);
 }
 
-void drawMesh(Mesh* mesh) {
-    bindMesh(mesh);
+void drawSimpleMesh(SimpleMesh* mesh) {
+    bindSimpleMesh(mesh);
+    mat4 model;
+    glm_mat4_identity(model);
+    glUniformMatrix4fv(0, 1, false, model);
+
+    glUniform4f(1, 1.0f, 1.0f, 1.0f, 1.0f);
     glDrawElements(GL_TRIANGLES, mesh->numIndices, GL_UNSIGNED_INT, NULL);
 }

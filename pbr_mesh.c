@@ -2,11 +2,11 @@
 // Created by wehuf on 6/23/2024.
 //
 
-#include "mesh.h"
+#include "pbr_mesh.h"
 
 #include "scene.h"
 
-void createMesh(Mesh** outMesh, Material material, int64_t numVertices, Vertex* vertices, int64_t numIndices, unsigned int* indices) {
+void createPbrMesh(PbrMesh** outMesh, PbrMaterial* material, int64_t numVertices, PbrVertex* vertices, int64_t numIndices, unsigned int* indices) {
     GLuint vao;
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
@@ -14,7 +14,7 @@ void createMesh(Mesh** outMesh, Material material, int64_t numVertices, Vertex* 
     GLuint vbo;
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, numVertices * sizeof(Vertex), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, numVertices * sizeof(PbrVertex), vertices, GL_STATIC_DRAW);
 
     GLuint ebo;
     glGenBuffers(1, &ebo);
@@ -26,15 +26,15 @@ void createMesh(Mesh** outMesh, Material material, int64_t numVertices, Vertex* 
     glEnableVertexAttribArray(2);
     glEnableVertexAttribArray(3);
     glEnableVertexAttribArray(4);
-    glVertexAttribPointer(0, 3, GL_FLOAT, false, sizeof(Vertex), (void*)0);                           // Positions
-    glVertexAttribPointer(1, 3, GL_FLOAT, false, sizeof(Vertex), (void*)offsetof(Vertex, normal));    // Normals
-    glVertexAttribPointer(2, 3, GL_FLOAT, false, sizeof(Vertex), (void*)offsetof(Vertex, tangent));   // Tangents
-    glVertexAttribPointer(3, 3, GL_FLOAT, false, sizeof(Vertex), (void*)offsetof(Vertex, bitangent)); // Bitangents
-    glVertexAttribPointer(4, 2, GL_FLOAT, false, sizeof(Vertex), (void*)offsetof(Vertex, uv));        // UVs
+    glVertexAttribPointer(0, 3, GL_FLOAT, false, sizeof(PbrVertex), (void*)0);                              // Positions
+    glVertexAttribPointer(1, 3, GL_FLOAT, false, sizeof(PbrVertex), (void*)offsetof(PbrVertex, normal));    // Normals
+    glVertexAttribPointer(2, 3, GL_FLOAT, false, sizeof(PbrVertex), (void*)offsetof(PbrVertex, tangent));   // Tangents
+    glVertexAttribPointer(3, 3, GL_FLOAT, false, sizeof(PbrVertex), (void*)offsetof(PbrVertex, bitangent)); // Bitangents
+    glVertexAttribPointer(4, 2, GL_FLOAT, false, sizeof(PbrVertex), (void*)offsetof(PbrVertex, uv));        // UVs
 
     glBindVertexArray(0);
 
-    Mesh* mesh = arraddnptr(scene.meshes, 1);
+    PbrMesh* mesh = arraddnptr(scene.pbrMeshes, 1);
     mesh->material = material;
     mesh->vao = vao;
     mesh->vbo = vbo;
@@ -43,18 +43,18 @@ void createMesh(Mesh** outMesh, Material material, int64_t numVertices, Vertex* 
     if (outMesh != NULL) *outMesh = mesh;
 }
 
-void deleteMesh(Mesh* mesh) {
+void deletePbrMesh(PbrMesh* mesh) {
     glDeleteVertexArrays(1, &mesh->vao);
     glDeleteBuffers(1, &mesh->vbo);
     glDeleteBuffers(1, &mesh->ebo);
 }
 
-void bindMesh(Mesh* mesh) {
+static void bindPbrMesh(PbrMesh* mesh) {
     glBindVertexArray(mesh->vao);
-    bindMaterial(&mesh->material);
+    bindPbrMaterial(mesh->material);
 }
 
-void drawMesh(Mesh* mesh) {
-    bindMesh(mesh);
+void drawPbrMesh(PbrMesh* mesh) {
+    bindPbrMesh(mesh);
     glDrawElements(GL_TRIANGLES, mesh->numIndices, GL_UNSIGNED_INT, NULL);
 }
