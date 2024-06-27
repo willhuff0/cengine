@@ -7,7 +7,9 @@
 #include <stdio.h>
 
 #include "debug.h"
+#include "fly_camera.h"
 #include "fps_player.h"
+#include "ibl.h"
 #include "scene.h"
 
 #define DEFAULT_WINDOW_WIDTH  1920/1.25
@@ -40,7 +42,7 @@ void initEngine() {
 
     glfwSetErrorCallback(glfw_ErrorCallback);
 
-    glfwInitHint(GLFW_ANGLE_PLATFORM_TYPE, GLFW_ANGLE_PLATFORM_TYPE_VULKAN);
+    glfwInitHint(GLFW_ANGLE_PLATFORM_TYPE, GLFW_ANGLE_PLATFORM_TYPE_OPENGLES);
     if (!glfwInit()) {
         error("Failed to initialize glfw.");
         return;
@@ -64,19 +66,31 @@ void initEngine() {
 
     glfwMakeContextCurrent(window);
 
+    // int numExtensions;
+    // glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
+    // for (int i = 0; i < numExtensions; ++i) {
+    //     printf("Extension: %s\n", (char*)glGetStringi(GL_EXTENSIONS, i));
+    // }
+
     glfwSwapInterval(1);
 
     glViewport(0, 0, engine.windowWidth, engine.windowHeight);
     glfwSetFramebufferSizeCallback(window, glfw_FramebufferResizeCallback);
 
     glEnable(GL_DEPTH_TEST);
-    glClearColor(0.0f, 0.3f, 0.4f, 1.0f);
+    //glClearColor(0.0f, 0.3f, 0.4f, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glGenBuffers(1, &engine.cengineUbo);
     glBindBuffer(GL_UNIFORM_BUFFER, engine.cengineUbo);
     glBufferData(GL_UNIFORM_BUFFER, sizeof(mat4), NULL, GL_STATIC_DRAW);
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, engine.cengineUbo);
+
+    glGenBuffers(1, &engine.cenginePbrUbo);
+    glBindBuffer(GL_UNIFORM_BUFFER, engine.cenginePbrUbo);
+    glBufferData(GL_UNIFORM_BUFFER, sizeof(CEnginePbr), NULL, GL_STATIC_DRAW);
+    glBindBufferBase(GL_UNIFORM_BUFFER, 1, engine.cenginePbrUbo);
 
     printEngineInfo();
 }
@@ -96,18 +110,22 @@ static void makeViewProjMat(mat4 viewProjMat) {
 FrameArgs frameArgs;
 
 static void tick() {
-    tickFpsPlayer(frameArgs.deltaTime);
+    tickFlyCamera(frameArgs.deltaTime);
 }
 
 static void renderFrame() {
-    drawSimpleMesh(&scene.simpleMeshes[0]);
+    for (int i = 0; i < arrlen(scene.pbrMeshes); ++i) {
+        drawPbrMesh(&scene.pbrMeshes[i]);
+    }
     debugRenderFrame();
+    iblRenderFrame();
 }
 
 void engineLoop() {
     initDebug();
+    initIbl();
 
-    setupFpsPlayer();
+    setupFlyCamera();
 
     double lastTime = glfwGetTime();
     while(!glfwWindowShouldClose(engine.window)) {
@@ -121,6 +139,9 @@ void engineLoop() {
 
         frameArgs = (FrameArgs) {time, deltaTime};
         makeViewProjMat(frameArgs.viewProjMat);
+        glm_vec4(scene.camera.position, 0.0f, frameArgs.pbr.viewPos);
+        glm_vec4(scene.light.dir, 0.0f, frameArgs.pbr.lightDir);
+        glm_vec4(scene.light.intensity, 0.0f, frameArgs.pbr.lightIntensity);
 
         tick();
 
@@ -129,9 +150,13 @@ void engineLoop() {
         glBindBuffer(GL_UNIFORM_BUFFER, engine.cengineUbo);
         glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(mat4), frameArgs.viewProjMat);
 
+        glBindBuffer(GL_UNIFORM_BUFFER, engine.cenginePbrUbo);
+        glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(CEnginePbr), &frameArgs.pbr);
+
+        debugDrawPoint((vec3){0.0f, 0.0f, 0.0f}, 3.0f, (vec3){0.0f, 1.0f, 0.0f});
         debugDrawPoint((vec3){0.0f, 3.0f, 0.0f}, 3.0f, (vec3){1.0f, 0.0f, 0.0f});
-        debugDrawPoint((vec3){3.0f, 0.0f, 0.0f}, 50.0f, (vec3){1.0f, 0.0f, 0.0f});
-        debugDrawPoint((vec3){0.0f, 3.0f, 0.0f}, 100.0f, (vec3){1.0f, 0.0f, 0.0f});
+        debugDrawPoint((vec3){3.0f, 0.0f, 0.0f}, 3.0f, (vec3){1.0f, 0.0f, 0.0f});
+        debugDrawPoint((vec3){0.0f, 0.0f, 3.0f}, 3.0f, (vec3){1.0f, 0.0f, 0.0f});
 
         renderFrame();
 
@@ -139,9 +164,13 @@ void engineLoop() {
     }
 
     freeDebug();
+    freeIbl();
 }
 
 void freeEngine() {
+    glDeleteBuffers(1, &engine.cengineUbo);
+    glDeleteBuffers(1, &engine.cenginePbrUbo);
+
     glfwSetErrorCallback(NULL);
 
     if (engine.window != NULL) {

@@ -25,12 +25,10 @@ void createPbrMesh(PbrMesh** outMesh, PbrMaterial* material, int64_t numVertices
     glEnableVertexAttribArray(1);
     glEnableVertexAttribArray(2);
     glEnableVertexAttribArray(3);
-    glEnableVertexAttribArray(4);
     glVertexAttribPointer(0, 3, GL_FLOAT, false, sizeof(PbrVertex), (void*)0);                              // Positions
     glVertexAttribPointer(1, 3, GL_FLOAT, false, sizeof(PbrVertex), (void*)offsetof(PbrVertex, normal));    // Normals
     glVertexAttribPointer(2, 3, GL_FLOAT, false, sizeof(PbrVertex), (void*)offsetof(PbrVertex, tangent));   // Tangents
-    glVertexAttribPointer(3, 3, GL_FLOAT, false, sizeof(PbrVertex), (void*)offsetof(PbrVertex, bitangent)); // Bitangents
-    glVertexAttribPointer(4, 2, GL_FLOAT, false, sizeof(PbrVertex), (void*)offsetof(PbrVertex, uv));        // UVs
+    glVertexAttribPointer(3, 2, GL_FLOAT, false, sizeof(PbrVertex), (void*)offsetof(PbrVertex, uv));        // UVs
 
     glBindVertexArray(0);
 
@@ -56,5 +54,9 @@ static void bindPbrMesh(PbrMesh* mesh) {
 
 void drawPbrMesh(PbrMesh* mesh) {
     bindPbrMesh(mesh);
+    mat4 modelMat;
+    glm_mat4_identity(modelMat);
+    glm_scale(modelMat, (vec3){3.0f, 3.0f, 3.0f});
+    glUniformMatrix4fv(0, 1, false, modelMat);
     glDrawElements(GL_TRIANGLES, mesh->numIndices, GL_UNSIGNED_INT, NULL);
 }

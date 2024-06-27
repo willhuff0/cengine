@@ -17,7 +17,14 @@ typedef struct {
 } Camera;
 
 typedef struct {
+    vec3 dir;
+    vec3 intensity;
+} Light;
+
+typedef struct {
     Camera camera;
+    Light light;
+
     Texture* textures;
     ShaderProgram* shaders;
     SimpleMaterial* simpleMaterials;

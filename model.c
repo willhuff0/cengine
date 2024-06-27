@@ -11,6 +11,8 @@
 #include "common.h"
 #include "scene.h"
 
+//#define USE_EMBEDDED_TEXTURES
+
 static SimpleMesh* addSimpleMesh(SimpleMaterial* material, struct aiMesh* aiMesh) {
     SimpleVertex* vertices = malloc(aiMesh->mNumVertices * sizeof(SimpleVertex));
     unsigned int* indices = malloc(aiMesh->mNumFaces * 3 * sizeof(unsigned int));
@@ -82,49 +84,7 @@ void freeSimpleModel(SimpleModel* model) {
     free(model->meshes);
 }
 
-static void addTexture(Texture** texture, const char* dir, const char* path) {
-    int dirLen = strlen(dir);
-    int pathLen = strlen(path);
-
-    int length = dirLen + pathLen + 2;
-    char* absolutePath = malloc(length);
-    memcpy(absolutePath, dir, dirLen);
-    absolutePath[dirLen] = '\\';
-    memcpy(absolutePath + dirLen + 1, path, pathLen);
-    absolutePath[length - 1] = '\0';
-
-    createTexture(texture, absolutePath);
-
-    free(absolutePath);
-}
-
-static PbrMaterial* addPbrMaterial(ShaderProgram* shader, const char* dir, struct aiMaterial* aiMat) {
-    PbrMaterial* material;
-    createPbrMaterial(&material, shader);
-
-    struct aiString path;
-
-    if (aiGetMaterialTexture(aiMat, aiTextureType_BASE_COLOR,        0, &path, NULL, NULL, NULL, NULL, NULL, NULL) == aiReturn_SUCCESS) addTexture(&material->albedo, dir, path.data);
-    else createTexture(&material->albedo, DEFAULT_ALBEDO_TEXTURE_PATH);
-
-    if (aiGetMaterialTexture(aiMat, aiTextureType_NORMALS,           0, &path, NULL, NULL, NULL, NULL, NULL, NULL) == aiReturn_SUCCESS) addTexture(&material->normal, dir, path.data);
-    else createTexture(&material->normal, DEFAULT_NORMAL_TEXTURE_PATH);
-
-    if (aiGetMaterialTexture(aiMat, aiTextureType_DIFFUSE_ROUGHNESS, 0, &path, NULL, NULL, NULL, NULL, NULL, NULL) == aiReturn_SUCCESS) addTexture(&material->roughness, dir, path.data);
-    else createTexture(&material->roughness, DEFAULT_ROUGHNESS_TEXTURE_PATH);
-
-    if (aiGetMaterialTexture(aiMat, aiTextureType_METALNESS,         0, &path, NULL, NULL, NULL, NULL, NULL, NULL) == aiReturn_SUCCESS) addTexture(&material->metallic, dir, path.data);
-    else createTexture(&material->metallic, DEFAULT_METALLIC_TEXTURE_PATH);
-
-    if (aiGetMaterialTexture(aiMat, aiTextureType_AMBIENT_OCCLUSION, 0, &path, NULL, NULL, NULL, NULL, NULL, NULL) == aiReturn_SUCCESS) addTexture(&material->ao, dir, path.data);
-    else createTexture(&material->ao, DEFAULT_AO_TEXTURE_PATH);
-
-    return material;
-}
-
-static PbrMesh* addPbrMesh(ShaderProgram* shader, const char* dir, const struct aiScene* aiScene, struct aiMesh* aiMesh) {
-    PbrMaterial* material = addPbrMaterial(shader, dir, aiScene->mMaterials[aiMesh->mMaterialIndex]);
-
+static PbrMesh* addPbrMesh(struct aiMesh* aiMesh, PbrMaterial** materials) {
     PbrVertex* vertices = malloc(aiMesh->mNumVertices * sizeof(PbrVertex));
     unsigned int* indices = malloc(aiMesh->mNumFaces * 3 * sizeof(unsigned int));
 
@@ -161,12 +121,70 @@ static PbrMesh* addPbrMesh(ShaderProgram* shader, const char* dir, const struct 
     }
 
     PbrMesh* mesh;
-    createPbrMesh(&mesh, material, aiMesh->mNumVertices, vertices, aiMesh->mNumFaces * 3, indices);
+    createPbrMesh(&mesh, materials[aiMesh->mMaterialIndex], aiMesh->mNumVertices, vertices, aiMesh->mNumFaces * 3, indices);
 
     free(vertices);
     free(indices);
 
     return mesh;
+}
+
+static void addFileTexture(Texture** texture, const char* dir, const char* path) {
+    int dirLen = strlen(dir);
+    int pathLen = strlen(path);
+
+    int length = dirLen + pathLen + 2;
+    char* absolutePath = malloc(length);
+    memcpy(absolutePath, dir, dirLen);
+    absolutePath[dirLen] = '\\';
+    memcpy(absolutePath + dirLen + 1, path, pathLen);
+    absolutePath[length - 1] = '\0';
+
+    createTextureFromPath(texture, absolutePath);
+
+    free(absolutePath);
+}
+
+static void addTexture(const struct aiScene* aiScene, Texture** texture, enum aiTextureType type, const char* dir, const char* defaultPath, struct aiMaterial* aiMat) {
+    if (aiGetMaterialTextureCount(aiMat, type) == 0) {
+        createTextureFromPath(texture, defaultPath);
+        return;
+    }
+
+    struct aiString path;
+    if (aiGetMaterialTexture(aiMat, type, 0, &path, NULL, NULL, NULL, NULL, NULL, NULL) != aiReturn_SUCCESS) {
+        createTextureFromPath(texture, defaultPath);
+        return;
+    }
+
+    if (path.data[0] == '*') {
+        // Embedded texture
+        struct aiTexture* aiTexture = aiScene->mTextures[atoi(&path.data[1])];
+        if (aiTexture->mHeight == 0) {
+            // Compressed
+            createTextureFromData(texture, aiTexture->mFilename.data, (uint8_t*)aiTexture->pcData, aiTexture->mWidth);
+        } else {
+            // Raw
+            fprintf(stderr, "Uncompressed image data is not supported!\n");
+            exit(69);
+        }
+    } else {
+        // File texture
+        addFileTexture(texture, dir, path.data);
+    }
+}
+
+static PbrMaterial* addPbrMaterial(const struct aiScene* aiScene, ShaderProgram* shader, const char* dir, struct aiMaterial* aiMat) {
+    PbrMaterial* material;
+    createPbrMaterial(&material, shader);
+
+    addTexture(aiScene, &material->albedo,    aiTextureType_BASE_COLOR,        dir, DEFAULT_TEXTURE_ALBEDO_PATH, aiMat);
+    addTexture(aiScene, &material->normal,    aiTextureType_NORMALS,           dir, DEFAULT_TEXTURE_NORMAL_PATH, aiMat);
+    addTexture(aiScene, &material->roughness, aiTextureType_DIFFUSE_ROUGHNESS, dir, DEFAULT_TEXTURE_ROUGHNESS_PATH, aiMat);
+    addTexture(aiScene, &material->metallic,  aiTextureType_METALNESS,         dir, DEFAULT_TEXTURE_METALLIC_PATH, aiMat);
+    addTexture(aiScene, &material->ao,        aiTextureType_AMBIENT_OCCLUSION, dir, DEFAULT_TEXTURE_AO_PATH, aiMat);
+
+    return material;
 }
 
 bool loadPbrModel(PbrModel* outModel, ShaderProgram* shader, const char* dir, const char* path) {
@@ -176,7 +194,11 @@ bool loadPbrModel(PbrModel* outModel, ShaderProgram* shader, const char* dir, co
                                             aiProcess_JoinIdenticalVertices |
                                             aiProcess_FlipUVs |
                                             aiProcess_CalcTangentSpace |
-                                            aiProcess_GenNormals);
+                                            aiProcess_GenNormals
+#ifdef USE_EMBEDDED_TEXTURES
+    | aiProcess_EmbedTextures
+#endif
+                                            );
     if (aiScene == NULL) {
         fprintf(stderr, "[MESH] Failed to load assimp scene: %s\n", aiGetErrorString());
         return false;
@@ -186,13 +208,19 @@ bool loadPbrModel(PbrModel* outModel, ShaderProgram* shader, const char* dir, co
         return false;
     }
 
+    PbrMaterial** materials = malloc(aiScene->mNumMaterials * sizeof(PbrMaterial*));
+    for (int i = 0; i < aiScene->mNumMaterials; ++i) {
+        materials[i] = addPbrMaterial(aiScene, shader, dir, aiScene->mMaterials[i]);
+    }
+
     PbrModel model;
     model.numMeshes = aiScene->mNumMeshes;
     model.meshes = malloc(aiScene->mNumMeshes * sizeof(PbrMesh*));
-
     for (int i = 0; i < aiScene->mNumMeshes; ++i) {
-        model.meshes[i] = addPbrMesh(shader, dir, aiScene, aiScene->mMeshes[i]);
+        model.meshes[i] = addPbrMesh(aiScene->mMeshes[i], materials);
     }
+
+    free(materials);
 
     aiReleaseImport(aiScene);
 

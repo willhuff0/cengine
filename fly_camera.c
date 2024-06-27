@@ -9,8 +9,8 @@
 #include "engine.h"
 #include "scene.h"
 
-#define FPS_CAMERA_MOVE_SPEED 1.5f
-#define FPS_CAMERA_SPRINT_MOVE_SPEED 3.0f
+#define FPS_CAMERA_MOVE_SPEED 8.0f
+#define FPS_CAMERA_SPRINT_MOVE_SPEED 16.0f
 #define FPS_CAMERA_LOOK_SENSITIVITY 5.0f
 
 static float lookX = 0.0f;
@@ -47,7 +47,7 @@ void tickFlyCamera(float delta) {
     if (glfwGetKey(engine.window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) move[1] -= 1.0f;
     glm_normalize(move);
 
-    float speed = glfwGetKey(engine.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS ? FPS_CAMERA_SPRINT_MOVE_SPEED : FPS_CAMERA_MOVE_SPEED;
+    float speed = glfwGetKey(engine.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS ? FPS_CAMERA_MOVE_SPEED : FPS_CAMERA_SPRINT_MOVE_SPEED;
 
     move[0] *= speed * delta;
     move[1] *= speed * delta;

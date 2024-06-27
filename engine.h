@@ -8,16 +8,24 @@
 #include "common.h"
 
 typedef struct {
+    vec4 viewPos;
+    vec4 lightDir;
+    vec4 lightIntensity;
+} CEnginePbr;
+
+typedef struct {
     GLFWwindow* window;
     int windowWidth;
     int windowHeight;
     GLuint cengineUbo;
+    GLuint cenginePbrUbo;
 } Engine;
 
 typedef struct {
     float time;
     float deltaTime;
     mat4 viewProjMat;
+    CEnginePbr pbr;
 } FrameArgs;
 
 extern Engine engine;

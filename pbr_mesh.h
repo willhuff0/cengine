@@ -12,7 +12,6 @@ typedef struct {
     vec3 position;
     vec3 normal;
     vec3 tangent;
-    vec3 bitangent;
     vec2 uv;
 } PbrVertex;
 
@@ -29,6 +28,6 @@ void createPbrMesh(PbrMesh** outMesh, PbrMaterial* material, int64_t numVertices
 void deletePbrMesh(PbrMesh* mesh);
 
 //void bindPbrMesh(PbrMesh* mesh);
-void drawPrbMesh(PbrMesh* mesh);
+void drawPbrMesh(PbrMesh* mesh);
 
 #endif //PBR_MESH_H

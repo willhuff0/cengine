@@ -10,6 +10,11 @@ bool sceneIsLoaded = false;
 static void initScene() {
     glm_vec3((vec3){0.0f, 0.0f, 3.0f}, scene.camera.position);
     glm_vec3((vec3){0.0f, 0.0f, -1.0f}, scene.camera.forward);
+
+    glm_vec3((vec3){0.25f, -1.0f, 0.25f}, scene.light.dir);
+    glm_normalize(scene.light.dir);
+    glm_vec3((vec3){5.0f, 5.0f, 5.0f}, scene.light.intensity);
+
     scene.textures = NULL;
     scene.shaders = NULL;
     scene.simpleMaterials = NULL;

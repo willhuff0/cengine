@@ -22,6 +22,8 @@ add_executable(cengine main.c
         debug.c
         simple_material.c
         pbr_mesh.c
+        ibl.c
+        ibl.h
 )
 
 target_include_directories(cengine PRIVATE ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/include/angle)

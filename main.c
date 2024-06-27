@@ -9,10 +9,10 @@ int main(int argc, const char* argv[])
     createScene();
 
     ShaderProgram* sp;
-    createShaderProgram(&sp, DEFAULT_SHADER_SIMPLE);
+    createShaderProgram(&sp, DEFAULT_SHADER_PBR);
 
-    SimpleModel model;
-    loadSimpleModel(&model, sp, DEFAULT_MODEL_SHAPES_CUBE);
+    PbrModel boomBox;
+    loadPbrModel(&boomBox, sp, "C:\\Users\\wehuf\\CLionProjects\\cengine\\test\\sponza", "C:\\Users\\wehuf\\CLionProjects\\cengine\\test\\sponza\\Sponza.gltf");
 
     engineLoop();
 
