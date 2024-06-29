@@ -9,9 +9,9 @@ layout (binding = 1) uniform sampler2D u_tex_normal;
 layout (binding = 2) uniform sampler2D u_tex_roughness;
 layout (binding = 3) uniform sampler2D u_tex_metallic;
 layout (binding = 4) uniform sampler2D u_tex_ao;
-layout (binding = 5) uniform sampler2D u_GGXLUT;
-layout (binding = 6) uniform samplerCube u_cubemap;
-layout (binding = 7) uniform samplerCube u_irradiance;
+//layout (binding = 5) uniform sampler2D u_GGXLUT;
+//layout (binding = 6) uniform samplerCube u_cubemap;
+//layout (binding = 7) uniform samplerCube u_irradiance;
 
 layout (std140, binding = 1) uniform CEnginePbr {
     vec4 viewPos;
@@ -36,50 +36,50 @@ float clampedDot(vec3 x, vec3 y)
     return clamp(dot(x, y), 0.0, 1.0);
 }
 
-vec3 getIBLRadianceGGX(vec3 n, vec3 v, float roughness, vec3 F0, float specularWeight)
-{
-    float NdotV = clampedDot(n, v);
-    float lod = roughness * float(u_MipCount - 1);
-    vec3 reflection = normalize(reflect(-v, n));
-
-    vec2 brdfSamplePoint = clamp(vec2(NdotV, roughness), vec2(0.0, 0.0), vec2(1.0, 1.0));
-    vec2 f_ab = texture(u_GGXLUT, brdfSamplePoint).rg;
-    vec4 specularSample = texture(u_cubemap, reflection) * u_EnvIntensity;
-
-    vec3 specularLight = specularSample.rgb;
-
-    // see https://bruop.github.io/ibl/#single_scattering_results at Single Scattering Results
-    // Roughness dependent fresnel, from Fdez-Aguera
-    vec3 Fr = max(vec3(1.0 - roughness), F0) - F0;
-    vec3 k_S = F0 + Fr * pow(1.0 - NdotV, 5.0);
-    vec3 FssEss = k_S * f_ab.x + f_ab.y;
-
-    return specularWeight * specularLight * FssEss;
-}
-
-vec3 getIBLRadianceLambertian(vec3 n, vec3 v, float roughness, vec3 diffuseColor, vec3 F0, float specularWeight)
-{
-    float NdotV = clampedDot(n, v);
-    vec2 brdfSamplePoint = clamp(vec2(NdotV, roughness), vec2(0.0, 0.0), vec2(1.0, 1.0));
-    vec2 f_ab = texture(u_GGXLUT, brdfSamplePoint).rg;
-
-    vec3 irradiance = texture(u_irradiance, n).rgb * u_EnvIntensity;
-
-    // see https://bruop.github.io/ibl/#single_scattering_results at Single Scattering Results
-    // Roughness dependent fresnel, from Fdez-Aguera
-
-    vec3 Fr = max(vec3(1.0 - roughness), F0) - F0;
-    vec3 k_S = F0 + Fr * pow(1.0 - NdotV, 5.0);
-    vec3 FssEss = specularWeight * k_S * f_ab.x + f_ab.y; // <--- GGX / specular light contribution (scale it down if the specularWeight is low)
-
-    // Multiple scattering, from Fdez-Aguera
-    float Ems = (1.0 - (f_ab.x + f_ab.y));
-    vec3 F_avg = specularWeight * (F0 + (1.0 - F0) / 21.0);
-    vec3 FmsEms = Ems * FssEss * F_avg / (1.0 - F_avg * Ems);
-    vec3 k_D = diffuseColor * (1.0 - FssEss + FmsEms); // we use +FmsEms as indicated by the formula in the blog post (might be a typo in the implementation)
-
-    return (FmsEms + k_D) * irradiance;
-}
+//vec3 getIBLRadianceGGX(vec3 n, vec3 v, float roughness, vec3 F0, float specularWeight)
+//{
+//    float NdotV = clampedDot(n, v);
+//    float lod = roughness * float(u_MipCount - 1);
+//    vec3 reflection = normalize(reflect(-v, n));
+//
+//    vec2 brdfSamplePoint = clamp(vec2(NdotV, roughness), vec2(0.0, 0.0), vec2(1.0, 1.0));
+//    vec2 f_ab = texture(u_GGXLUT, brdfSamplePoint).rg;
+//    vec4 specularSample = texture(u_cubemap, reflection) * u_EnvIntensity;
+//
+//    vec3 specularLight = specularSample.rgb;
+//
+//    // see https://bruop.github.io/ibl/#single_scattering_results at Single Scattering Results
+//    // Roughness dependent fresnel, from Fdez-Aguera
+//    vec3 Fr = max(vec3(1.0 - roughness), F0) - F0;
+//    vec3 k_S = F0 + Fr * pow(1.0 - NdotV, 5.0);
+//    vec3 FssEss = k_S * f_ab.x + f_ab.y;
+//
+//    return specularWeight * specularLight * FssEss;
+//}
+//
+//vec3 getIBLRadianceLambertian(vec3 n, vec3 v, float roughness, vec3 diffuseColor, vec3 F0, float specularWeight)
+//{
+//    float NdotV = clampedDot(n, v);
+//    vec2 brdfSamplePoint = clamp(vec2(NdotV, roughness), vec2(0.0, 0.0), vec2(1.0, 1.0));
+//    vec2 f_ab = texture(u_GGXLUT, brdfSamplePoint).rg;
+//
+//    vec3 irradiance = texture(u_irradiance, n).rgb * u_EnvIntensity;
+//
+//    // see https://bruop.github.io/ibl/#single_scattering_results at Single Scattering Results
+//    // Roughness dependent fresnel, from Fdez-Aguera
+//
+//    vec3 Fr = max(vec3(1.0 - roughness), F0) - F0;
+//    vec3 k_S = F0 + Fr * pow(1.0 - NdotV, 5.0);
+//    vec3 FssEss = specularWeight * k_S * f_ab.x + f_ab.y; // <--- GGX / specular light contribution (scale it down if the specularWeight is low)
+//
+//    // Multiple scattering, from Fdez-Aguera
+//    float Ems = (1.0 - (f_ab.x + f_ab.y));
+//    vec3 F_avg = specularWeight * (F0 + (1.0 - F0) / 21.0);
+//    vec3 FmsEms = Ems * FssEss * F_avg / (1.0 - F_avg * Ems);
+//    vec3 k_D = diffuseColor * (1.0 - FssEss + FmsEms); // we use +FmsEms as indicated by the formula in the blog post (might be a typo in the implementation)
+//
+//    return (FmsEms + k_D) * irradiance;
+//}
 
 vec3 F_Schlick(vec3 f0, vec3 f90, float VdotH)
 {
@@ -144,8 +144,8 @@ void main() {
     vec3 f_specular = vec3(0.0f);
 
     // IBL
-    f_specular += getIBLRadianceGGX(n, v, perceptualRoughness, f0, specularWeight);
-    f_diffuse += getIBLRadianceLambertian(n, v, perceptualRoughness, c_diff, f0, specularWeight);
+    //f_specular += getIBLRadianceGGX(n, v, perceptualRoughness, f0, specularWeight);
+    //f_diffuse += getIBLRadianceLambertian(n, v, perceptualRoughness, c_diff, f0, specularWeight);
 
     vec3 f_diffuse_ibl = f_diffuse;
     vec3 f_specular_ibl = f_specular;
@@ -153,27 +153,27 @@ void main() {
     f_specular = vec3(0.0f);
 
     // For each light
-//    vec3 l = normalize(-pbrTangent.lightDir);                        // Vector light pos to frag pos tangent space
-//    vec3 h = normalize(l + v);                                       // Half vector
-//
-//    float NdotL = clampedDot(n, l);
-//    float NdotV = clampedDot(n, v);
-//    float NdotH = clampedDot(n, h);
-//    float LdotH = clampedDot(l, h);
-//    float VdotH = clampedDot(v, h);
-//
-//    if (NdotL > 0.0 || NdotV > 0.0)
-//    {
-//        vec3 intensity = vec3(pbr.lightIntensity);
-//        vec3 l_diffuse = vec3(0.0f);
-//        vec3 l_specular = vec3(0.0f);
-//
-//        l_diffuse += intensity * NdotL *  BRDF_lambertian(f0, f90, c_diff, specularWeight, VdotH);
-//        l_specular += intensity * NdotL * BRDF_specularGGX(f0, f90, alphaRoughness, specularWeight, VdotH, NdotL, NdotV, NdotH);
-//
-//        f_diffuse += l_diffuse;
-//        f_specular += l_specular;
-//    }
+    vec3 l = normalize(-pbrTangent.lightDir);                        // Vector light pos to frag pos tangent space
+    vec3 h = normalize(l + v);                                       // Half vector
+
+    float NdotL = clampedDot(n, l);
+    float NdotV = clampedDot(n, v);
+    float NdotH = clampedDot(n, h);
+    float LdotH = clampedDot(l, h);
+    float VdotH = clampedDot(v, h);
+
+    if (NdotL > 0.0 || NdotV > 0.0)
+    {
+        vec3 intensity = vec3(pbr.lightIntensity);
+        vec3 l_diffuse = vec3(0.0f);
+        vec3 l_specular = vec3(0.0f);
+
+        l_diffuse += intensity * NdotL *  BRDF_lambertian(f0, f90, c_diff, specularWeight, VdotH);
+        l_specular += intensity * NdotL * BRDF_specularGGX(f0, f90, alphaRoughness, specularWeight, VdotH, NdotL, NdotV, NdotH);
+
+        f_diffuse += l_diffuse;
+        f_specular += l_specular;
+    }
     //
 
     vec3 diffuse;

@@ -9,10 +9,6 @@ layout (std140, binding = 1) uniform CEnginePbr {
     vec4 viewPos;
     vec4 lightDir;
     vec4 lightIntensity;
-    float envIntensity;
-    float envBlurNormalized;
-    float mipCount;
-    float extra;
 } pbr;
 
 layout (location = 0) in vec3 v_uv;

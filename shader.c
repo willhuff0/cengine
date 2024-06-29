@@ -89,14 +89,16 @@ bool createShaderProgram(ShaderProgram** outSp, const char* vertPath, const char
         return false;
     }
 
-    ShaderProgram* sp = arraddnptr(scene.shaders, 1);
+    ShaderProgram* sp = malloc(sizeof(ShaderProgram));
     sp->program = program;
+    arrput(scene.shaders, sp);
     if (outSp != NULL) *outSp = sp;
     return true;
 }
 
 void deleteShaderProgram(ShaderProgram* sp) {
     glDeleteProgram(sp->program);
+    free(sp);
 }
 
 void bindShaderProgram(ShaderProgram* sp) {

@@ -51,126 +51,126 @@ build cmake_object_order_depends_target_cengine: phony || CMakeFiles/cengine.dir
 
 build CMakeFiles/cengine.dir/main.c.obj: C_COMPILER__cengine_unscanned_Debug C$:/Users/wehuf/CLionProjects/cengine/main.c || cmake_object_order_depends_target_cengine
   DEP_FILE = CMakeFiles\cengine.dir\main.c.obj.d
-  FLAGS = -g -fdiagnostics-color=always
+  FLAGS = -g -g -fdiagnostics-color=always
   INCLUDES = -IC:/Users/wehuf/CLionProjects/cengine/include -IC:/Users/wehuf/CLionProjects/cengine/include/angle
   OBJECT_DIR = CMakeFiles\cengine.dir
   OBJECT_FILE_DIR = CMakeFiles\cengine.dir
 
 build CMakeFiles/cengine.dir/common.c.obj: C_COMPILER__cengine_unscanned_Debug C$:/Users/wehuf/CLionProjects/cengine/common.c || cmake_object_order_depends_target_cengine
   DEP_FILE = CMakeFiles\cengine.dir\common.c.obj.d
-  FLAGS = -g -fdiagnostics-color=always
+  FLAGS = -g -g -fdiagnostics-color=always
   INCLUDES = -IC:/Users/wehuf/CLionProjects/cengine/include -IC:/Users/wehuf/CLionProjects/cengine/include/angle
   OBJECT_DIR = CMakeFiles\cengine.dir
   OBJECT_FILE_DIR = CMakeFiles\cengine.dir
 
 build CMakeFiles/cengine.dir/stb_impl.c.obj: C_COMPILER__cengine_unscanned_Debug C$:/Users/wehuf/CLionProjects/cengine/stb_impl.c || cmake_object_order_depends_target_cengine
   DEP_FILE = CMakeFiles\cengine.dir\stb_impl.c.obj.d
-  FLAGS = -g -fdiagnostics-color=always
+  FLAGS = -g -g -fdiagnostics-color=always
   INCLUDES = -IC:/Users/wehuf/CLionProjects/cengine/include -IC:/Users/wehuf/CLionProjects/cengine/include/angle
   OBJECT_DIR = CMakeFiles\cengine.dir
   OBJECT_FILE_DIR = CMakeFiles\cengine.dir
 
 build CMakeFiles/cengine.dir/engine.c.obj: C_COMPILER__cengine_unscanned_Debug C$:/Users/wehuf/CLionProjects/cengine/engine.c || cmake_object_order_depends_target_cengine
   DEP_FILE = CMakeFiles\cengine.dir\engine.c.obj.d
-  FLAGS = -g -fdiagnostics-color=always
+  FLAGS = -g -g -fdiagnostics-color=always
   INCLUDES = -IC:/Users/wehuf/CLionProjects/cengine/include -IC:/Users/wehuf/CLionProjects/cengine/include/angle
   OBJECT_DIR = CMakeFiles\cengine.dir
   OBJECT_FILE_DIR = CMakeFiles\cengine.dir
 
 build CMakeFiles/cengine.dir/scene.c.obj: C_COMPILER__cengine_unscanned_Debug C$:/Users/wehuf/CLionProjects/cengine/scene.c || cmake_object_order_depends_target_cengine
   DEP_FILE = CMakeFiles\cengine.dir\scene.c.obj.d
-  FLAGS = -g -fdiagnostics-color=always
+  FLAGS = -g -g -fdiagnostics-color=always
   INCLUDES = -IC:/Users/wehuf/CLionProjects/cengine/include -IC:/Users/wehuf/CLionProjects/cengine/include/angle
   OBJECT_DIR = CMakeFiles\cengine.dir
   OBJECT_FILE_DIR = CMakeFiles\cengine.dir
 
 build CMakeFiles/cengine.dir/shader.c.obj: C_COMPILER__cengine_unscanned_Debug C$:/Users/wehuf/CLionProjects/cengine/shader.c || cmake_object_order_depends_target_cengine
   DEP_FILE = CMakeFiles\cengine.dir\shader.c.obj.d
-  FLAGS = -g -fdiagnostics-color=always
+  FLAGS = -g -g -fdiagnostics-color=always
   INCLUDES = -IC:/Users/wehuf/CLionProjects/cengine/include -IC:/Users/wehuf/CLionProjects/cengine/include/angle
   OBJECT_DIR = CMakeFiles\cengine.dir
   OBJECT_FILE_DIR = CMakeFiles\cengine.dir
 
 build CMakeFiles/cengine.dir/simple_mesh.c.obj: C_COMPILER__cengine_unscanned_Debug C$:/Users/wehuf/CLionProjects/cengine/simple_mesh.c || cmake_object_order_depends_target_cengine
   DEP_FILE = CMakeFiles\cengine.dir\simple_mesh.c.obj.d
-  FLAGS = -g -fdiagnostics-color=always
+  FLAGS = -g -g -fdiagnostics-color=always
   INCLUDES = -IC:/Users/wehuf/CLionProjects/cengine/include -IC:/Users/wehuf/CLionProjects/cengine/include/angle
   OBJECT_DIR = CMakeFiles\cengine.dir
   OBJECT_FILE_DIR = CMakeFiles\cengine.dir
 
 build CMakeFiles/cengine.dir/pbr_material.c.obj: C_COMPILER__cengine_unscanned_Debug C$:/Users/wehuf/CLionProjects/cengine/pbr_material.c || cmake_object_order_depends_target_cengine
   DEP_FILE = CMakeFiles\cengine.dir\pbr_material.c.obj.d
-  FLAGS = -g -fdiagnostics-color=always
+  FLAGS = -g -g -fdiagnostics-color=always
   INCLUDES = -IC:/Users/wehuf/CLionProjects/cengine/include -IC:/Users/wehuf/CLionProjects/cengine/include/angle
   OBJECT_DIR = CMakeFiles\cengine.dir
   OBJECT_FILE_DIR = CMakeFiles\cengine.dir
 
 build CMakeFiles/cengine.dir/texture.c.obj: C_COMPILER__cengine_unscanned_Debug C$:/Users/wehuf/CLionProjects/cengine/texture.c || cmake_object_order_depends_target_cengine
   DEP_FILE = CMakeFiles\cengine.dir\texture.c.obj.d
-  FLAGS = -g -fdiagnostics-color=always
+  FLAGS = -g -g -fdiagnostics-color=always
   INCLUDES = -IC:/Users/wehuf/CLionProjects/cengine/include -IC:/Users/wehuf/CLionProjects/cengine/include/angle
   OBJECT_DIR = CMakeFiles\cengine.dir
   OBJECT_FILE_DIR = CMakeFiles\cengine.dir
 
 build CMakeFiles/cengine.dir/model.c.obj: C_COMPILER__cengine_unscanned_Debug C$:/Users/wehuf/CLionProjects/cengine/model.c || cmake_object_order_depends_target_cengine
   DEP_FILE = CMakeFiles\cengine.dir\model.c.obj.d
-  FLAGS = -g -fdiagnostics-color=always
+  FLAGS = -g -g -fdiagnostics-color=always
   INCLUDES = -IC:/Users/wehuf/CLionProjects/cengine/include -IC:/Users/wehuf/CLionProjects/cengine/include/angle
   OBJECT_DIR = CMakeFiles\cengine.dir
   OBJECT_FILE_DIR = CMakeFiles\cengine.dir
 
 build CMakeFiles/cengine.dir/stbi_impl.c.obj: C_COMPILER__cengine_unscanned_Debug C$:/Users/wehuf/CLionProjects/cengine/stbi_impl.c || cmake_object_order_depends_target_cengine
   DEP_FILE = CMakeFiles\cengine.dir\stbi_impl.c.obj.d
-  FLAGS = -g -fdiagnostics-color=always
+  FLAGS = -g -g -fdiagnostics-color=always
   INCLUDES = -IC:/Users/wehuf/CLionProjects/cengine/include -IC:/Users/wehuf/CLionProjects/cengine/include/angle
   OBJECT_DIR = CMakeFiles\cengine.dir
   OBJECT_FILE_DIR = CMakeFiles\cengine.dir
 
 build CMakeFiles/cengine.dir/fly_camera.c.obj: C_COMPILER__cengine_unscanned_Debug C$:/Users/wehuf/CLionProjects/cengine/fly_camera.c || cmake_object_order_depends_target_cengine
   DEP_FILE = CMakeFiles\cengine.dir\fly_camera.c.obj.d
-  FLAGS = -g -fdiagnostics-color=always
+  FLAGS = -g -g -fdiagnostics-color=always
   INCLUDES = -IC:/Users/wehuf/CLionProjects/cengine/include -IC:/Users/wehuf/CLionProjects/cengine/include/angle
   OBJECT_DIR = CMakeFiles\cengine.dir
   OBJECT_FILE_DIR = CMakeFiles\cengine.dir
 
 build CMakeFiles/cengine.dir/fps_player.c.obj: C_COMPILER__cengine_unscanned_Debug C$:/Users/wehuf/CLionProjects/cengine/fps_player.c || cmake_object_order_depends_target_cengine
   DEP_FILE = CMakeFiles\cengine.dir\fps_player.c.obj.d
-  FLAGS = -g -fdiagnostics-color=always
+  FLAGS = -g -g -fdiagnostics-color=always
   INCLUDES = -IC:/Users/wehuf/CLionProjects/cengine/include -IC:/Users/wehuf/CLionProjects/cengine/include/angle
   OBJECT_DIR = CMakeFiles\cengine.dir
   OBJECT_FILE_DIR = CMakeFiles\cengine.dir
 
 build CMakeFiles/cengine.dir/bounds.c.obj: C_COMPILER__cengine_unscanned_Debug C$:/Users/wehuf/CLionProjects/cengine/bounds.c || cmake_object_order_depends_target_cengine
   DEP_FILE = CMakeFiles\cengine.dir\bounds.c.obj.d
-  FLAGS = -g -fdiagnostics-color=always
+  FLAGS = -g -g -fdiagnostics-color=always
   INCLUDES = -IC:/Users/wehuf/CLionProjects/cengine/include -IC:/Users/wehuf/CLionProjects/cengine/include/angle
   OBJECT_DIR = CMakeFiles\cengine.dir
   OBJECT_FILE_DIR = CMakeFiles\cengine.dir
 
 build CMakeFiles/cengine.dir/debug.c.obj: C_COMPILER__cengine_unscanned_Debug C$:/Users/wehuf/CLionProjects/cengine/debug.c || cmake_object_order_depends_target_cengine
   DEP_FILE = CMakeFiles\cengine.dir\debug.c.obj.d
-  FLAGS = -g -fdiagnostics-color=always
+  FLAGS = -g -g -fdiagnostics-color=always
   INCLUDES = -IC:/Users/wehuf/CLionProjects/cengine/include -IC:/Users/wehuf/CLionProjects/cengine/include/angle
   OBJECT_DIR = CMakeFiles\cengine.dir
   OBJECT_FILE_DIR = CMakeFiles\cengine.dir
 
 build CMakeFiles/cengine.dir/simple_material.c.obj: C_COMPILER__cengine_unscanned_Debug C$:/Users/wehuf/CLionProjects/cengine/simple_material.c || cmake_object_order_depends_target_cengine
   DEP_FILE = CMakeFiles\cengine.dir\simple_material.c.obj.d
-  FLAGS = -g -fdiagnostics-color=always
+  FLAGS = -g -g -fdiagnostics-color=always
   INCLUDES = -IC:/Users/wehuf/CLionProjects/cengine/include -IC:/Users/wehuf/CLionProjects/cengine/include/angle
   OBJECT_DIR = CMakeFiles\cengine.dir
   OBJECT_FILE_DIR = CMakeFiles\cengine.dir
 
 build CMakeFiles/cengine.dir/pbr_mesh.c.obj: C_COMPILER__cengine_unscanned_Debug C$:/Users/wehuf/CLionProjects/cengine/pbr_mesh.c || cmake_object_order_depends_target_cengine
   DEP_FILE = CMakeFiles\cengine.dir\pbr_mesh.c.obj.d
-  FLAGS = -g -fdiagnostics-color=always
+  FLAGS = -g -g -fdiagnostics-color=always
   INCLUDES = -IC:/Users/wehuf/CLionProjects/cengine/include -IC:/Users/wehuf/CLionProjects/cengine/include/angle
   OBJECT_DIR = CMakeFiles\cengine.dir
   OBJECT_FILE_DIR = CMakeFiles\cengine.dir
 
 build CMakeFiles/cengine.dir/ibl.c.obj: C_COMPILER__cengine_unscanned_Debug C$:/Users/wehuf/CLionProjects/cengine/ibl.c || cmake_object_order_depends_target_cengine
   DEP_FILE = CMakeFiles\cengine.dir\ibl.c.obj.d
-  FLAGS = -g -fdiagnostics-color=always
+  FLAGS = -g -g -fdiagnostics-color=always
   INCLUDES = -IC:/Users/wehuf/CLionProjects/cengine/include -IC:/Users/wehuf/CLionProjects/cengine/include/angle
   OBJECT_DIR = CMakeFiles\cengine.dir
   OBJECT_FILE_DIR = CMakeFiles\cengine.dir
@@ -184,7 +184,7 @@ build CMakeFiles/cengine.dir/ibl.c.obj: C_COMPILER__cengine_unscanned_Debug C$:/
 # Link the executable cengine.exe
 
 build cengine.exe: C_EXECUTABLE_LINKER__cengine_Debug CMakeFiles/cengine.dir/main.c.obj CMakeFiles/cengine.dir/common.c.obj CMakeFiles/cengine.dir/stb_impl.c.obj CMakeFiles/cengine.dir/engine.c.obj CMakeFiles/cengine.dir/scene.c.obj CMakeFiles/cengine.dir/shader.c.obj CMakeFiles/cengine.dir/simple_mesh.c.obj CMakeFiles/cengine.dir/pbr_material.c.obj CMakeFiles/cengine.dir/texture.c.obj CMakeFiles/cengine.dir/model.c.obj CMakeFiles/cengine.dir/stbi_impl.c.obj CMakeFiles/cengine.dir/fly_camera.c.obj CMakeFiles/cengine.dir/fps_player.c.obj CMakeFiles/cengine.dir/bounds.c.obj CMakeFiles/cengine.dir/debug.c.obj CMakeFiles/cengine.dir/simple_material.c.obj CMakeFiles/cengine.dir/pbr_mesh.c.obj CMakeFiles/cengine.dir/ibl.c.obj | C$:/Users/wehuf/CLionProjects/cengine/libs/win/libglfw3.a C$:/Users/wehuf/CLionProjects/cengine/libs/win/libGLESv2.lib C$:/Users/wehuf/CLionProjects/cengine/libs/win/libEGL.lib C$:/Users/wehuf/CLionProjects/cengine/libs/win/assimp-vc143-mtd.lib C$:/Users/wehuf/CLionProjects/cengine/libs/win/libcglm.a C$:/Users/wehuf/CLionProjects/cengine/libs/win/libode_singlesd.a
-  FLAGS = -g
+  FLAGS = -g -g
   LINK_FLAGS = -static-libgcc -static-libstdc++ -static
   LINK_LIBRARIES = C:/Users/wehuf/CLionProjects/cengine/libs/win/libglfw3.a  C:/Users/wehuf/CLionProjects/cengine/libs/win/libGLESv2.lib  C:/Users/wehuf/CLionProjects/cengine/libs/win/libEGL.lib  C:/Users/wehuf/CLionProjects/cengine/libs/win/assimp-vc143-mtd.lib  C:/Users/wehuf/CLionProjects/cengine/libs/win/libcglm.a  C:/Users/wehuf/CLionProjects/cengine/libs/win/libode_singlesd.a  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\cengine.dir
