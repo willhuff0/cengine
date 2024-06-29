@@ -175,8 +175,7 @@ static void addTexture(const struct aiScene* aiScene, Texture** texture, enum ai
 }
 
 static PbrMaterial* addPbrMaterial(const struct aiScene* aiScene, ShaderProgram* shader, const char* dir, struct aiMaterial* aiMat) {
-    PbrMaterial* material;
-    createPbrMaterial(&material, shader);
+    PbrMaterial* material = createPbrMaterial(shader);
 
     addTexture(aiScene, &material->albedo,    aiTextureType_BASE_COLOR,        dir, DEFAULT_TEXTURE_ALBEDO_PATH, aiMat);
     addTexture(aiScene, &material->normal,    aiTextureType_NORMALS,           dir, DEFAULT_TEXTURE_NORMAL_PATH, aiMat);
@@ -200,17 +199,36 @@ bool loadPbrModel(PbrModel* outModel, ShaderProgram* shader, const char* dir, co
 #endif
                                             );
     if (aiScene == NULL) {
-        fprintf(stderr, "[MESH] Failed to load assimp scene: %s\n", aiGetErrorString());
+        fprintf(stderr, "[MODEL] Failed to load assimp scene: %s\n", aiGetErrorString());
         return false;
     }
     if (aiScene->mNumMeshes < 1) {
-        fprintf(stderr, "[MESH] assimp scene has no meshes: %s\n", path);
+        fprintf(stderr, "[MODEL] assimp scene has no meshes: %s\n", path);
+        aiReleaseImport(aiScene);
         return false;
     }
 
     PbrMaterial** materials = malloc(aiScene->mNumMaterials * sizeof(PbrMaterial*));
+    if (materials == NULL) {
+        fprintf(stderr, "[MODEL] Failed to allocate memory for materials.\n");
+        aiReleaseImport(aiScene);
+        return false;
+    }
+
+    bool success = true;
     for (int i = 0; i < aiScene->mNumMaterials; ++i) {
         materials[i] = addPbrMaterial(aiScene, shader, dir, aiScene->mMaterials[i]);
+        if (materials[i] == NULL) {
+            fprintf(stderr, "[MODEL] Failed to add pbr material.\n");
+            success = false;
+            break;
+        }
+    }
+
+    if (!success) {
+        free(materials);
+        aiReleaseImport(aiScene);
+        return false;
     }
 
     PbrModel model;

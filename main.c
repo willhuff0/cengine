@@ -8,11 +8,11 @@ int main(int argc, const char* argv[])
 
     createScene();
 
-    ShaderProgram* sp;
-    createShaderProgram(&sp, DEFAULT_SHADER_PBR);
-
-    PbrModel boomBox;
-    loadPbrModel(&boomBox, sp, "C:\\Users\\wehuf\\CLionProjects\\cengine\\test\\sponza", "C:\\Users\\wehuf\\CLionProjects\\cengine\\test\\sponza\\Sponza.gltf");
+    // ShaderProgram* sp;
+    // createShaderProgram(&sp, DEFAULT_SHADER_PBR);
+    //
+    // PbrModel boomBox;
+    // loadPbrModel(&boomBox, sp, "C:\\Users\\wehuf\\CLionProjects\\cengine\\test\\sponza", "C:\\Users\\wehuf\\CLionProjects\\cengine\\test\\sponza\\Sponza.gltf");
 
     engineLoop();
 

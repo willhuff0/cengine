@@ -116,32 +116,32 @@ void unloadScene() {
     sceneIsLoaded = false;
 
     for (int i = 0; i < arrlen(scene.textures); ++i) {
-        deleteTexture(&scene.textures[i]);
+        deleteTexture(scene.textures[i]);
     }
     arrfree(scene.textures);
 
     for (int i = 0; i < arrlen(scene.shaders); ++i) {
-        deleteShaderProgram(&scene.shaders[i]);
+        deleteShaderProgram(scene.shaders[i]);
     }
     arrfree(scene.shaders);
 
     for (int i = 0; i < arrlen(scene.simpleMaterials); ++i) {
-        deleteSimpleMaterial(&scene.simpleMaterials[i]);
+        deleteSimpleMaterial(scene.simpleMaterials[i]);
     }
     arrfree(scene.simpleMaterials);
 
     for (int i = 0; i < arrlen(scene.simpleMeshes); ++i) {
-        deleteSimpleMesh(&scene.simpleMeshes[i]);
+        deleteSimpleMesh(scene.simpleMeshes[i]);
     }
     arrfree(scene.simpleMeshes);
 
     for (int i = 0; i < arrlen(scene.pbrMaterials); ++i) {
-        deletePbrMaterial(&scene.pbrMaterials[i]);
+        deletePbrMaterial(scene.pbrMaterials[i]);
     }
     arrfree(scene.pbrMaterials);
 
     for (int i = 0; i < arrlen(scene.pbrMeshes); ++i) {
-        deletePbrMesh(&scene.pbrMeshes[i]);
+        deletePbrMesh(scene.pbrMeshes[i]);
     }
     arrfree(scene.pbrMeshes);
 

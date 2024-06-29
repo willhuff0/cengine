@@ -114,6 +114,10 @@ Texture* cubemapTexture;
 Texture* irradianceTexture;
 Texture* ggxLutTexture;
 
+static void applyFilter(int distribution, float roughness, int targetMipLevel, GLuint targetTexture, int sampleCount, float lodBias) {
+
+}
+
 static void convertHDRIToCubemap(Texture* hdriTexture, Texture** outCubemapTexture, Texture** outIrradianceTexture) {
     GLuint captureFbo, captureRbo;
     glGenFramebuffers(1, &captureFbo);
@@ -179,6 +183,8 @@ static void convertHDRIToCubemap(Texture* hdriTexture, Texture** outCubemapTextu
 }
 
 void initIbl() {
+    glDisable(GL_CULL_FACE);
+
     // HDRI to cubemap
     if (!createShaderProgram(&hdriToCubemapShader, DEFAULT_SHADER_HDRI_TO_CUBEMAP)) {
         fprintf(stderr, "[IBL] Failed to load HDRI to cubemap shader.\n");
@@ -230,9 +236,12 @@ void initIbl() {
     glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, false, sizeof(vec3), 0);
+
+    glEnable(GL_CULL_FACE);
 }
 
 void iblRenderFrame() {
+    glDisable(GL_CULL_FACE);
     glBindVertexArray(cubemapVao);
     bindShaderProgram(cubemapShader);
     glActiveTexture(GL_TEXTURE0);
@@ -241,6 +250,7 @@ void iblRenderFrame() {
     glDepthFunc(GL_LEQUAL);
     glDrawArrays(GL_TRIANGLES, 0, 36);
     glDepthFunc(GL_LESS);
+    glEnable(GL_CULL_FACE);
 }
 
 void freeIbl() {

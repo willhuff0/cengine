@@ -21,8 +21,9 @@ static bool createTexture(Texture** outTexture, uint8_t* data, int width, int he
 
     stbi_image_free(data);
 
-    Texture* texture = arraddnptr(scene.textures, 1);
+    Texture* texture = malloc(sizeof(Texture));
     texture->texture = gl_tex;
+    arrput(scene.textures, texture);
     if (outTexture != NULL) *outTexture = texture;
     return true;
 }
@@ -79,8 +80,9 @@ bool createCubemapTextureFromPaths(Texture** outTexture, const char* paths[6]) {
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-    Texture* texture = arraddnptr(scene.textures, 1);
+    Texture* texture = malloc(sizeof(Texture));
     texture->texture = gl_tex;
+    arrput(scene.textures, texture);
     if (outTexture != NULL) *outTexture = texture;
     return true;
 }
@@ -102,8 +104,9 @@ void createEmptyCubemapTexture(Texture** outTexture, int resolution) {
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-    Texture* texture = arraddnptr(scene.textures, 1);
+    Texture* texture = malloc(sizeof(Texture));
     texture->texture = gl_tex;
+    arrput(scene.textures, texture);
     if (outTexture != NULL) *outTexture = texture;
 }
 
@@ -130,14 +133,16 @@ bool createHDRITextureFromPath(Texture** outTexture, const char* path) {
 
     stbi_image_free(data);
 
-    Texture* texture = arraddnptr(scene.textures, 1);
+    Texture* texture = malloc(sizeof(Texture));
     texture->texture = gl_tex;
+    arrput(scene.textures, texture);
     if (outTexture != NULL) *outTexture = texture;
     return true;
 }
 
 void deleteTexture(Texture* texture) {
     glDeleteTextures(1, &texture->texture);
+    free(texture);
 }
 
 void bindTexture(Texture* texture, GLenum slot) {

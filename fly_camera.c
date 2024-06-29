@@ -9,8 +9,8 @@
 #include "engine.h"
 #include "scene.h"
 
-#define FPS_CAMERA_MOVE_SPEED 8.0f
-#define FPS_CAMERA_SPRINT_MOVE_SPEED 16.0f
+#define FPS_CAMERA_MOVE_SPEED 10.0f
+#define FPS_CAMERA_SPRINT_MOVE_SPEED 30.0f
 #define FPS_CAMERA_LOOK_SENSITIVITY 5.0f
 
 static float lookX = 0.0f;

@@ -8,8 +8,9 @@
 #include "scene.h"
 
 void createSimpleMaterial(SimpleMaterial** outMaterial, ShaderProgram* shader) {
-    SimpleMaterial* material = arraddnptr(scene.simpleMaterials, 1);
+    SimpleMaterial* material = malloc(sizeof(SimpleMaterial));
     material->shader = shader;
+    arrput(scene.simpleMaterials, material);
     if (outMaterial != NULL) *outMaterial = material;
 }
 

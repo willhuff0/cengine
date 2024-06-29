@@ -6,7 +6,7 @@
 
 #include "scene.h"
 
-void createPbrMesh(PbrMesh** outMesh, PbrMaterial* material, int64_t numVertices, PbrVertex* vertices, int64_t numIndices, unsigned int* indices) {
+void createPbrMesh(PbrMesh** outMesh, PbrMaterial* material, unsigned int numVertices, PbrVertex* vertices, int numIndices, unsigned int* indices) {
     GLuint vao;
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
@@ -32,12 +32,13 @@ void createPbrMesh(PbrMesh** outMesh, PbrMaterial* material, int64_t numVertices
 
     glBindVertexArray(0);
 
-    PbrMesh* mesh = arraddnptr(scene.pbrMeshes, 1);
+    PbrMesh* mesh = malloc(sizeof(PbrMesh));
     mesh->material = material;
     mesh->vao = vao;
     mesh->vbo = vbo;
     mesh->ebo = ebo;
     mesh->numIndices = numIndices;
+    arrput(scene.pbrMeshes, mesh);
     if (outMesh != NULL) *outMesh = mesh;
 }
 
@@ -45,18 +46,14 @@ void deletePbrMesh(PbrMesh* mesh) {
     glDeleteVertexArrays(1, &mesh->vao);
     glDeleteBuffers(1, &mesh->vbo);
     glDeleteBuffers(1, &mesh->ebo);
+    free(mesh);
 }
 
-static void bindPbrMesh(PbrMesh* mesh) {
+void bindPbrMesh(PbrMesh* mesh) {
     glBindVertexArray(mesh->vao);
     bindPbrMaterial(mesh->material);
 }
 
 void drawPbrMesh(PbrMesh* mesh) {
-    bindPbrMesh(mesh);
-    mat4 modelMat;
-    glm_mat4_identity(modelMat);
-    glm_scale(modelMat, (vec3){3.0f, 3.0f, 3.0f});
-    glUniformMatrix4fv(0, 1, false, modelMat);
     glDrawElements(GL_TRIANGLES, mesh->numIndices, GL_UNSIGNED_INT, NULL);
 }

@@ -26,14 +26,13 @@ void createSimpleMesh(SimpleMesh** outMesh, SimpleMaterial* material, int64_t nu
     glVertexAttribPointer(0, 3, GL_FLOAT, false, sizeof(SimpleVertex), (void*)0);                                 // Positions
     glVertexAttribPointer(1, 3, GL_FLOAT, false, sizeof(SimpleVertex), (void*)offsetof(SimpleVertex, normal));    // Normals
 
-    glBindVertexArray(0);
-
-    SimpleMesh* mesh = arraddnptr(scene.simpleMeshes, 1);
+    SimpleMesh* mesh = malloc(sizeof(SimpleMesh));
     mesh->material = material;
     mesh->vao = vao;
     mesh->vbo = vbo;
     mesh->ebo = ebo;
     mesh->numIndices = numIndices;
+    arrput(scene.simpleMeshes, mesh);
     if (outMesh != NULL) *outMesh = mesh;
 }
 
@@ -41,19 +40,18 @@ void deleteSimpleMesh(SimpleMesh* mesh) {
     glDeleteVertexArrays(1, &mesh->vao);
     glDeleteBuffers(1, &mesh->vbo);
     glDeleteBuffers(1, &mesh->ebo);
+    free(mesh);
 }
 
-static void bindSimpleMesh(SimpleMesh* mesh) {
+void bindSimpleMesh(SimpleMesh* mesh) {
     glBindVertexArray(mesh->vao);
     bindSimpleMaterial(mesh->material);
 }
 
 void drawSimpleMesh(SimpleMesh* mesh) {
-    bindSimpleMesh(mesh);
-    mat4 model;
-    glm_mat4_identity(model);
-    glUniformMatrix4fv(0, 1, false, model);
-
-    glUniform4f(1, 1.0f, 1.0f, 1.0f, 1.0f);
     glDrawElements(GL_TRIANGLES, mesh->numIndices, GL_UNSIGNED_INT, NULL);
+}
+
+void drawSimpleMeshInstanced(SimpleMesh* mesh, int numInstances) {
+    glDrawElementsInstanced(GL_TRIANGLES, mesh->numIndices, GL_UNSIGNED_INT, NULL, numInstances);
 }

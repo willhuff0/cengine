@@ -18,7 +18,7 @@ typedef struct {
     Texture* ao;
 } PbrMaterial;
 
-void createPbrMaterial(PbrMaterial** outMaterial, ShaderProgram* shader);
+PbrMaterial* createPbrMaterial(ShaderProgram* shader);
 void bindPbrMaterial(const PbrMaterial* material);
 void deletePbrMaterial(PbrMaterial* material);
 

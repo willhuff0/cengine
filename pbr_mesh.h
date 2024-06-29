@@ -24,10 +24,10 @@ typedef struct {
     GLuint ebo;
 } PbrMesh;
 
-void createPbrMesh(PbrMesh** outMesh, PbrMaterial* material, int64_t numVertices, PbrVertex* vertices, int64_t numIndices, unsigned int* indices);
+void createPbrMesh(PbrMesh** outMesh, PbrMaterial* material, unsigned int numVertices, PbrVertex* vertices, int numIndices, unsigned int* indices);
 void deletePbrMesh(PbrMesh* mesh);
 
-//void bindPbrMesh(PbrMesh* mesh);
+void bindPbrMesh(PbrMesh* mesh);
 void drawPbrMesh(PbrMesh* mesh);
 
 #endif //PBR_MESH_H

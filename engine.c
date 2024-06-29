@@ -78,6 +78,11 @@ void initEngine() {
     glfwSetFramebufferSizeCallback(window, glfw_FramebufferResizeCallback);
 
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glEnable(GL_CULL_FACE);
+
     //glClearColor(0.0f, 0.3f, 0.4f, 1.0f);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -114,11 +119,16 @@ static void tick() {
 }
 
 static void renderFrame() {
-    for (int i = 0; i < arrlen(scene.pbrMeshes); ++i) {
-        drawPbrMesh(&scene.pbrMeshes[i]);
-    }
-    debugRenderFrame();
     iblRenderFrame();
+    // for (int i = 0; i < arrlen(scene.pbrMeshes); ++i) {
+    //     bindPbrMesh(scene.pbrMeshes[i]);
+    //     mat4 modelMat;
+    //     glm_mat4_identity(modelMat);
+    //     glm_scale(modelMat, (vec3){3.0f, 3.0f, 3.0f});
+    //     glUniformMatrix4fv(0, 1, false, modelMat);
+    //     drawPbrMesh(scene.pbrMeshes[i]);
+    // }
+    debugRenderFrame();
 }
 
 void engineLoop() {
@@ -153,10 +163,13 @@ void engineLoop() {
         glBindBuffer(GL_UNIFORM_BUFFER, engine.cenginePbrUbo);
         glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(CEnginePbr), &frameArgs.pbr);
 
-        debugDrawPoint((vec3){0.0f, 0.0f, 0.0f}, 3.0f, (vec3){0.0f, 1.0f, 0.0f});
-        debugDrawPoint((vec3){0.0f, 3.0f, 0.0f}, 3.0f, (vec3){1.0f, 0.0f, 0.0f});
-        debugDrawPoint((vec3){3.0f, 0.0f, 0.0f}, 3.0f, (vec3){1.0f, 0.0f, 0.0f});
-        debugDrawPoint((vec3){0.0f, 0.0f, 3.0f}, 3.0f, (vec3){1.0f, 0.0f, 0.0f});
+        debugDrawPoint((vec3){0.0f, 0.0f, 0.0f}, 3.0f, (vec4){0.0f, 1.0f, 0.0f, 1.0f});
+        debugDrawPoint((vec3){0.0f, 3.0f, 0.0f}, 3.0f, (vec4){1.0f, 0.0f, 0.0f, 0.5f});
+        debugDrawPoint((vec3){3.0f, 0.0f, 0.0f}, 3.0f, (vec4){1.0f, 0.0f, 0.0f, 1.0f});
+        debugDrawPoint((vec3){0.0f, 0.0f, 3.0f}, 3.0f, (vec4){1.0f, 0.0f, 0.0f, 1.0f});
+
+        debugDrawVolume((vec3){10.0, 10.0, -15.0}, (vec3){20.0f, 10.0f, 15.0f}, (vec4){1.0, 0.5f, 0.5f, 0.5f});
+        debugDrawSphere((vec3){10.0, -10.0, -20.0}, 5.0f, (vec4){1.0, 0.5f, 1.0f, 0.25f});
 
         renderFrame();
 

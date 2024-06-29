@@ -25,12 +25,12 @@ typedef struct {
     Camera camera;
     Light light;
 
-    Texture* textures;
-    ShaderProgram* shaders;
-    SimpleMaterial* simpleMaterials;
-    SimpleMesh* simpleMeshes;
-    PbrMaterial* pbrMaterials;
-    PbrMesh* pbrMeshes;
+    Texture** textures;
+    ShaderProgram** shaders;
+    SimpleMaterial** simpleMaterials;
+    SimpleMesh** simpleMeshes;
+    PbrMaterial** pbrMaterials;
+    PbrMesh** pbrMeshes;
 } Scene;
 
 extern Scene scene;
