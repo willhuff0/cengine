@@ -5,6 +5,7 @@ layout(location = 0) in vec3 a_pos;
 layout(location = 1) in vec3 a_normal;
 layout(location = 2) in vec3 a_tangent;
 layout(location = 3) in vec2 a_uv;
+layout(location = 4) in vec2 a_lightmapUV;
 
 layout (std140, binding = 0) uniform CEngine {
     mat4 viewProjMat;
@@ -19,7 +20,8 @@ layout (std140, binding = 1) uniform CEnginePbr {
 } pbr;
 
 layout (location = 0) out vec2 v_uv;
-layout (location = 1) out PbrTangent {
+layout (location = 1) out vec2 v_lightmapUV;
+layout (location = 2) out PbrTangent {
     vec3 fragPos;
     vec3 viewPos;
     vec3 lightDir;
@@ -28,6 +30,7 @@ layout (location = 1) out PbrTangent {
 void main() {
     vec3 fragPos = vec3(u_modelMat * vec4(a_pos, 1.0));
     v_uv = a_uv;
+    v_lightmapUV = a_lightmapUV;
 
     mat3 normalMat = transpose(inverse(mat3(u_modelMat)));
     vec3 T = normalize(normalMat * a_tangent);

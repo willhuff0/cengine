@@ -25,10 +25,12 @@ void createPbrMesh(PbrMesh** outMesh, PbrMaterial* material, unsigned int numVer
     glEnableVertexAttribArray(1);
     glEnableVertexAttribArray(2);
     glEnableVertexAttribArray(3);
-    glVertexAttribPointer(0, 3, GL_FLOAT, false, sizeof(PbrVertex), (void*)0);                              // Positions
-    glVertexAttribPointer(1, 3, GL_FLOAT, false, sizeof(PbrVertex), (void*)offsetof(PbrVertex, normal));    // Normals
-    glVertexAttribPointer(2, 3, GL_FLOAT, false, sizeof(PbrVertex), (void*)offsetof(PbrVertex, tangent));   // Tangents
-    glVertexAttribPointer(3, 2, GL_FLOAT, false, sizeof(PbrVertex), (void*)offsetof(PbrVertex, uv));        // UVs
+    glEnableVertexAttribArray(4);
+    glVertexAttribPointer(0, 3, GL_FLOAT, false, sizeof(PbrVertex), (void*)0);                               // Positions
+    glVertexAttribPointer(1, 3, GL_FLOAT, false, sizeof(PbrVertex), (void*)offsetof(PbrVertex, normal));     // Normals
+    glVertexAttribPointer(2, 3, GL_FLOAT, false, sizeof(PbrVertex), (void*)offsetof(PbrVertex, tangent));    // Tangents
+    glVertexAttribPointer(3, 2, GL_FLOAT, false, sizeof(PbrVertex), (void*)offsetof(PbrVertex, uv));         // UVs
+    glVertexAttribPointer(4, 2, GL_FLOAT, false, sizeof(PbrVertex), (void*)offsetof(PbrVertex, lightmapUV)); // LightmapUVs
 
     glBindVertexArray(0);
 

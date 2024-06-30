@@ -13,6 +13,7 @@ typedef struct {
     vec3 normal;
     vec3 tangent;
     vec2 uv;
+    vec2 lightmapUV;
 } PbrVertex;
 
 typedef struct {

@@ -78,10 +78,10 @@ void initEngine() {
     glfwSetFramebufferSizeCallback(window, glfw_FramebufferResizeCallback);
 
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    glEnable(GL_CULL_FACE);
+    // glEnable(GL_BLEND);
+    // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    //
+    // glEnable(GL_CULL_FACE);
 
     //glClearColor(0.0f, 0.3f, 0.4f, 1.0f);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -97,12 +97,14 @@ void initEngine() {
     glBufferData(GL_UNIFORM_BUFFER, sizeof(CEnginePbr), NULL, GL_STATIC_DRAW);
     glBindBufferBase(GL_UNIFORM_BUFFER, 1, engine.cenginePbrUbo);
 
+    initIbl();
+
     printEngineInfo();
 }
 
 static void makeViewProjMat(mat4 viewProjMat) {
     mat4 proj;
-    glm_perspective(glm_rad(70.0f), (float)engine.windowWidth / (float)engine.windowHeight, 0.1f, 100.0, proj);
+    glm_perspective(glm_rad(70.0f), (float)engine.windowWidth / (float)engine.windowHeight, 0.1f, 300.0, proj);
 
     mat4 lookTarget;
     glm_vec3_add(scene.camera.position, scene.camera.forward, lookTarget);
@@ -119,21 +121,19 @@ static void tick() {
 }
 
 static void renderFrame() {
-    iblRenderFrame();
-    // for (int i = 0; i < arrlen(scene.pbrMeshes); ++i) {
-    //     bindPbrMesh(scene.pbrMeshes[i]);
-    //     mat4 modelMat;
-    //     glm_mat4_identity(modelMat);
-    //     glm_scale(modelMat, (vec3){3.0f, 3.0f, 3.0f});
-    //     glUniformMatrix4fv(0, 1, false, modelMat);
-    //     drawPbrMesh(scene.pbrMeshes[i]);
-    // }
+    for (int i = 0; i < arrlen(scene.pbrMeshes); ++i) {
+        bindPbrMesh(scene.pbrMeshes[i]);
+        mat4 modelMat;
+        glm_mat4_identity(modelMat);
+        glm_scale(modelMat, (vec3){0.01f, 0.01f, 0.01f});
+        glUniformMatrix4fv(0, 1, false, modelMat);
+        drawPbrMesh(scene.pbrMeshes[i]);
+    }
     debugRenderFrame();
 }
 
 void engineLoop() {
     initDebug();
-    initIbl();
 
     setupFlyCamera();
 
@@ -168,8 +168,8 @@ void engineLoop() {
         debugDrawPoint((vec3){3.0f, 0.0f, 0.0f}, 3.0f, (vec4){1.0f, 0.0f, 0.0f, 1.0f});
         debugDrawPoint((vec3){0.0f, 0.0f, 3.0f}, 3.0f, (vec4){1.0f, 0.0f, 0.0f, 1.0f});
 
-        debugDrawVolume((vec3){10.0, 10.0, -15.0}, (vec3){20.0f, 10.0f, 15.0f}, (vec4){1.0, 0.5f, 0.5f, 0.5f});
-        debugDrawSphere((vec3){10.0, -10.0, -20.0}, 5.0f, (vec4){1.0, 0.5f, 1.0f, 0.25f});
+        //debugDrawVolume((vec3){10.0, 10.0, -15.0}, (vec3){20.0f, 10.0f, 15.0f}, (vec4){1.0, 0.5f, 0.5f, 0.5f});
+        //debugDrawSphere((vec3){10.0, -10.0, -20.0}, 5.0f, (vec4){1.0, 0.5f, 1.0f, 0.25f});
 
         renderFrame();
 
@@ -177,10 +177,11 @@ void engineLoop() {
     }
 
     freeDebug();
-    freeIbl();
 }
 
 void freeEngine() {
+    freeIbl();
+
     glDeleteBuffers(1, &engine.cengineUbo);
     glDeleteBuffers(1, &engine.cenginePbrUbo);
 

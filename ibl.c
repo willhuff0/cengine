@@ -8,255 +8,172 @@
 #include "shader.h"
 #include "texture.h"
 
-#define HDRI_TO_CUBEMAP_RESOLUTION 2048
-#define HDRI_TO_CUBEMAP_CONVOLUTION_RESOLUTION 32
+#define TEXTURE_SIZE 256
+#define GGX_SAMPLE_COUNT 1024
+#define LAMBERTIAN_SAMPLE_COUNT 2048
+#define SHEEN_SAMPLE_COUNT 64
+#define LOD_BIAS 0.0f
+#define LOWEST_MIP_LEVEL 4
+#define LUT_RESOLUTION 1024
 
-static float cubeVertices[] = {
-    // back face
-    -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
-     1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // top-right
-     1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f, // bottom-right
-     1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // top-right
-    -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
-    -1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f, // top-left
-    // front face
-    -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // bottom-left
-     1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f, // bottom-right
-     1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // top-right
-     1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // top-right
-    -1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f, // top-left
-    -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // bottom-left
-    // left face
-    -1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-right
-    -1.0f,  1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // top-left
-    -1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-left
-    -1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-left
-    -1.0f, -1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // bottom-right
-    -1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-right
-    // right face
-     1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-left
-     1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-right
-     1.0f,  1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // top-right
-     1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-right
-     1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-left
-     1.0f, -1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // bottom-left
-    // bottom face
-    -1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // top-right
-     1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 1.0f, // top-left
-     1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, // bottom-left
-     1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, // bottom-left
-    -1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f, // bottom-right
-    -1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // top-right
-    // top face
-    -1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f, // top-left
-     1.0f,  1.0f , 1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // bottom-right
-     1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f, // top-right
-     1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // bottom-right
-    -1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f, // top-left
-    -1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f  // bottom-left
-};
-
-static float skyboxVertices[] = {
-    // positions
-    -1.0f,  1.0f, -1.0f,
-    -1.0f, -1.0f, -1.0f,
-     1.0f, -1.0f, -1.0f,
-     1.0f, -1.0f, -1.0f,
-     1.0f,  1.0f, -1.0f,
-    -1.0f,  1.0f, -1.0f,
-
-    -1.0f, -1.0f,  1.0f,
-    -1.0f, -1.0f, -1.0f,
-    -1.0f,  1.0f, -1.0f,
-    -1.0f,  1.0f, -1.0f,
-    -1.0f,  1.0f,  1.0f,
-    -1.0f, -1.0f,  1.0f,
-
-     1.0f, -1.0f, -1.0f,
-     1.0f, -1.0f,  1.0f,
-     1.0f,  1.0f,  1.0f,
-     1.0f,  1.0f,  1.0f,
-     1.0f,  1.0f, -1.0f,
-     1.0f, -1.0f, -1.0f,
-
-    -1.0f, -1.0f,  1.0f,
-    -1.0f,  1.0f,  1.0f,
-     1.0f,  1.0f,  1.0f,
-     1.0f,  1.0f,  1.0f,
-     1.0f, -1.0f,  1.0f,
-    -1.0f, -1.0f,  1.0f,
-
-    -1.0f,  1.0f, -1.0f,
-     1.0f,  1.0f, -1.0f,
-     1.0f,  1.0f,  1.0f,
-     1.0f,  1.0f,  1.0f,
-    -1.0f,  1.0f,  1.0f,
-    -1.0f,  1.0f, -1.0f,
-
-    -1.0f, -1.0f, -1.0f,
-    -1.0f, -1.0f,  1.0f,
-     1.0f, -1.0f, -1.0f,
-     1.0f, -1.0f, -1.0f,
-    -1.0f, -1.0f,  1.0f,
-     1.0f, -1.0f,  1.0f
-};
-
-static ShaderProgram* hdriToCubemapShader;
-static ShaderProgram* convolutionShader;
-static GLuint cubeVao;
-static GLuint cubeVbo;
-
-static ShaderProgram* cubemapShader;
-static GLuint cubemapVao;
-static GLuint cubemapVbo;
-
-Texture* cubemapTexture;
-Texture* irradianceTexture;
-Texture* ggxLutTexture;
-
-static void applyFilter(int distribution, float roughness, int targetMipLevel, GLuint targetTexture, int sampleCount, float lodBias) {
-
-}
-
-static void convertHDRIToCubemap(Texture* hdriTexture, Texture** outCubemapTexture, Texture** outIrradianceTexture) {
-    GLuint captureFbo, captureRbo;
-    glGenFramebuffers(1, &captureFbo);
-    glGenRenderbuffers(1, &captureRbo);
-
-    glBindFramebuffer(GL_FRAMEBUFFER, captureFbo);
-    glBindRenderbuffer(GL_RENDERBUFFER, captureRbo);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, HDRI_TO_CUBEMAP_RESOLUTION, HDRI_TO_CUBEMAP_RESOLUTION);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRbo);
-
-    mat4 projMat;
-    glm_perspective(glm_rad(90.0f), 1.0f, 0.1f, 10.0f, projMat);
-    mat4 viewMats[6];
-    glm_lookat((vec3){0.0f, 0.0f, 0.0f}, (vec3){ 1.0f,  0.0f,  0.0f}, (vec3){0.0f, -1.0f,  0.0f}, viewMats[0]);
-    glm_lookat((vec3){0.0f, 0.0f, 0.0f}, (vec3){-1.0f,  0.0f,  0.0f}, (vec3){0.0f, -1.0f,  0.0f}, viewMats[1]);
-    glm_lookat((vec3){0.0f, 0.0f, 0.0f}, (vec3){ 0.0f,  1.0f,  0.0f}, (vec3){0.0f,  0.0f,  1.0f}, viewMats[2]);
-    glm_lookat((vec3){0.0f, 0.0f, 0.0f}, (vec3){ 0.0f, -1.0f,  0.0f}, (vec3){0.0f,  0.0f, -1.0f}, viewMats[3]);
-    glm_lookat((vec3){0.0f, 0.0f, 0.0f}, (vec3){ 0.0f,  0.0f,  1.0f}, (vec3){0.0f, -1.0f,  0.0f}, viewMats[4]);
-    glm_lookat((vec3){0.0f, 0.0f, 0.0f}, (vec3){ 0.0f,  0.0f, -1.0f}, (vec3){0.0f, -1.0f,  0.0f}, viewMats[5]);
-
-    Texture* cubemapTexture;
-    createEmptyCubemapTexture(&cubemapTexture, HDRI_TO_CUBEMAP_RESOLUTION);
-
-    bindShaderProgram(hdriToCubemapShader);
-    glUniformMatrix4fv(0, 1, false, projMat);
-
-    bindTexture(hdriTexture, GL_TEXTURE0);
-
-    glViewport(0, 0, HDRI_TO_CUBEMAP_RESOLUTION, HDRI_TO_CUBEMAP_RESOLUTION);
-    glBindVertexArray(cubeVao);
-    for (unsigned int i = 0; i < 6; ++i) {
-        glUniformMatrix4fv(1, 1, false, viewMats[i]);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, cubemapTexture->texture, 0);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glDrawArrays(GL_TRIANGLES, 0 , 36);
-    }
-
-    // Convolution
-    Texture* irradianceTexture;
-    createEmptyCubemapTexture(&irradianceTexture, HDRI_TO_CUBEMAP_CONVOLUTION_RESOLUTION);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, HDRI_TO_CUBEMAP_CONVOLUTION_RESOLUTION, HDRI_TO_CUBEMAP_CONVOLUTION_RESOLUTION);
-
-    bindShaderProgram(convolutionShader);
-    glUniformMatrix4fv(0, 1, false, projMat);
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture->texture);
-
-    glViewport(0, 0, HDRI_TO_CUBEMAP_CONVOLUTION_RESOLUTION, HDRI_TO_CUBEMAP_CONVOLUTION_RESOLUTION);
-    for (unsigned int i = 0; i < 6; ++i) {
-        glUniformMatrix4fv(1, 1, false, viewMats[i]);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, irradianceTexture->texture, 0);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glDrawArrays(GL_TRIANGLES, 0 , 36);
-    }
-
-    glViewport(0, 0, engine.windowWidth, engine.windowHeight);
-    glDeleteFramebuffers(1, &captureFbo);
-    glDeleteRenderbuffers(1, &captureRbo);
-
-    if (outCubemapTexture != NULL) *outCubemapTexture = cubemapTexture;
-    if (outIrradianceTexture != NULL) *outIrradianceTexture = irradianceTexture;
-}
+ShaderProgram* hdriToCubemapShader;
+ShaderProgram* filteringShader;
 
 void initIbl() {
-    glDisable(GL_CULL_FACE);
-
-    // HDRI to cubemap
     if (!createShaderProgram(&hdriToCubemapShader, DEFAULT_SHADER_HDRI_TO_CUBEMAP)) {
         fprintf(stderr, "[IBL] Failed to load HDRI to cubemap shader.\n");
-        exit(45);
-    }
-    if (!createShaderProgram(&convolutionShader, DEFAULT_SHADER_CONVOLUTION)) {
-        fprintf(stderr, "[IBL] Failed to load convolution shader.\n");
-        exit(46);
-    }
-
-    glGenVertexArrays(1, &cubeVao);
-    glBindVertexArray(cubeVao);
-    glGenBuffers(1, &cubeVbo);
-    glBindBuffer(GL_ARRAY_BUFFER, cubeVbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), &cubeVertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(0, 3, GL_FLOAT, false, 8 * sizeof(float), 0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, false, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-    glVertexAttribPointer(2, 2, GL_FLOAT, false, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-
-    // Skybox
-    if (!createShaderProgram(&cubemapShader, DEFAULT_SHADER_CUBEMAP)) {
-        fprintf(stderr, "[IBL] Failed to load cubemap shader.\n");
-        exit(47);
-    }
-
-    if (!createTextureFromPath(&ggxLutTexture, DEFAULT_TEXTURE_GGXLUT)) {
-        fprintf(stderr, "[IBL] Failed to load GGX LUT texture.\n");
         exit(48);
     }
-
-    // if (!createCubemapTextureFromPaths(&cubemapTexture, DEFAULT_TEXTURE_CUBEMAP_SKYBOX)) {
-    //     fprintf(stderr, "[IBL] Failed to load skybox cubemap.\n");
-    //     exit(49);
-    // }
-    Texture* hdriTexture;
-    if (!createHDRITextureFromPath(&hdriTexture, DEFAULT_TEXTURE_HDRI_SKYBOX)) {
-        fprintf(stderr, "[IBL] Failed to load skybox hdri.\n");
+    if (!createShaderProgram(&filteringShader, DEFAULT_SHADER_IBL_FILTERING)) {
+        fprintf(stderr, "[IBL] Failed to load filtering shader.\n");
         exit(49);
     }
-    convertHDRIToCubemap(hdriTexture, &cubemapTexture, &irradianceTexture);
-
-    glGenVertexArrays(1, &cubemapVao);
-    glBindVertexArray(cubemapVao);
-    glGenBuffers(1, &cubemapVbo);
-    glBindBuffer(GL_ARRAY_BUFFER, cubemapVbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, false, sizeof(vec3), 0);
-
-    glEnable(GL_CULL_FACE);
-}
-
-void iblRenderFrame() {
-    glDisable(GL_CULL_FACE);
-    glBindVertexArray(cubemapVao);
-    bindShaderProgram(cubemapShader);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture->texture);
-
-    glDepthFunc(GL_LEQUAL);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
-    glDepthFunc(GL_LESS);
-    glEnable(GL_CULL_FACE);
 }
 
 void freeIbl() {
-    glDeleteVertexArrays(1, &cubeVao);
-    glDeleteBuffers(1, &cubeVbo);
 
-    glDeleteVertexArrays(1, &cubemapVao);
-    glDeleteBuffers(1, &cubemapVbo);
+}
+
+static void hdriToCubemap(IBL* ibl, GLuint fbo, Texture* hdriTexture) {
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+    for (int i = 0; i < 6; ++i) {
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, ibl->cubemapTexture->texture, 0);
+
+        glBindTexture(GL_TEXTURE_CUBE_MAP, ibl->cubemapTexture->texture);
+
+        glViewport(0, 0, TEXTURE_SIZE, TEXTURE_SIZE);
+
+        glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        bindShaderProgram(hdriToCubemapShader);
+
+        bindTexture(hdriTexture, GL_TEXTURE0);
+
+        glUniform1i(0, i);
+
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+    }
+
+    glBindTexture(GL_TEXTURE_CUBE_MAP, ibl->cubemapTexture->texture);
+    glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+}
+
+static void applyFilter(IBL* ibl, GLuint fbo, int distribution, float roughness, int targetMipLevel, GLuint targetTexture, int sampleCount, float lodBias) {
+    int currentTextureSize = TEXTURE_SIZE >> targetMipLevel;
+
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+    for (int i = 0; i < 6; ++i) {
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, targetTexture, targetMipLevel);
+
+        glBindTexture(GL_TEXTURE_CUBE_MAP, targetTexture);
+
+        glViewport(0, 0, currentTextureSize, currentTextureSize);
+
+        glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        bindShaderProgram(filteringShader);
+
+        bindCubemapTexture(ibl->cubemapTexture, GL_TEXTURE0);
+
+        glUniform1f(0, roughness);
+        glUniform1i(1, sampleCount);
+        glUniform1i(2, TEXTURE_SIZE);
+        glUniform1f(3, lodBias);
+        glUniform1i(4, distribution);
+        glUniform1i(5, i);
+        glUniform1i(6, 0);
+
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+    }
+}
+
+static void cubemapToLambertian(IBL* ibl, GLuint fbo) {
+    applyFilter(ibl, fbo, 0, 0.0f, 0, ibl->lambertianTexture->texture, LAMBERTIAN_SAMPLE_COUNT, 0.0f);
+}
+
+static void cubemapToGGX(IBL* ibl, GLuint fbo) {
+    for (int currentMipLevel = 0; currentMipLevel <= ibl->mipmapLevels; ++currentMipLevel) {
+        float roughness = (float)currentMipLevel / (float)(ibl->mipmapLevels - 1);
+        applyFilter(ibl, fbo, 1, roughness, currentMipLevel, ibl->ggxTexture->texture, GGX_SAMPLE_COUNT, 0.0f);
+    }
+}
+
+static void cubemapToSheen(IBL* ibl, GLuint fbo) {
+    for (int currentMipLevel = 0; currentMipLevel <= ibl->mipmapLevels; ++currentMipLevel) {
+        float roughness = (float)currentMipLevel / (float)(ibl->mipmapLevels - 1);
+        applyFilter(ibl, fbo, 2, roughness, currentMipLevel, ibl->sheenTexture->texture, SHEEN_SAMPLE_COUNT, 0.0f);
+    }
+}
+
+static void sampleLut(IBL* ibl, GLuint fbo, int distribution, GLuint targetTexture, int currentTextureSize) {
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, targetTexture, 0);
+
+    glBindTexture(GL_TEXTURE_2D, targetTexture);
+
+    glViewport(0, 0, currentTextureSize, currentTextureSize);
+
+    glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    bindShaderProgram(filteringShader);
+
+    bindCubemapTexture(ibl->cubemapTexture, GL_TEXTURE0);
+
+    glUniform1f(0, 0.0f);
+    glUniform1i(1, 512);
+    glUniform1i(2, 0);
+    glUniform1f(3, 0.0f);
+    glUniform1i(4, distribution);
+    glUniform1i(5, 0);
+    glUniform1i(6, 1);
+
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+}
+
+static void sampleGGXLut(IBL* ibl, GLuint fbo) {
+    createEmptyLutTexture(&ibl->ggxLutTexture, LUT_RESOLUTION);
+    sampleLut(ibl, fbo, 1, ibl->ggxLutTexture->texture, LUT_RESOLUTION);
+}
+
+static void sampleCharlieLut(IBL* ibl, GLuint fbo) {
+    createEmptyLutTexture(&ibl->charlieLutTexture, LUT_RESOLUTION);
+    sampleLut(ibl, fbo, 2, ibl->charlieLutTexture->texture, LUT_RESOLUTION);
+}
+
+void setupSceneIbl(IBL* ibl, Texture* hdriTexture) {
+    createEmptyCubemapTexture(&ibl->cubemapTexture, TEXTURE_SIZE, true);
+
+    GLuint fbo;
+    glGenFramebuffers(1, &fbo);
+
+    createEmptyCubemapTexture(&ibl->lambertianTexture, TEXTURE_SIZE, false);
+    createEmptyCubemapTexture(&ibl->ggxTexture, TEXTURE_SIZE, true);
+    createEmptyCubemapTexture(&ibl->sheenTexture, TEXTURE_SIZE, true);
+
+    glBindTexture(GL_TEXTURE_CUBE_MAP, ibl->ggxTexture->texture);
+    glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+
+    glBindTexture(GL_TEXTURE_CUBE_MAP, ibl->sheenTexture->texture);
+    glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+
+    ibl->mipmapLevels = floor(log2(TEXTURE_SIZE)) + 1 - LOWEST_MIP_LEVEL;
+
+    // Filter all
+    hdriToCubemap(ibl, fbo, hdriTexture);
+    cubemapToLambertian(ibl, fbo);
+    cubemapToGGX(ibl, fbo);
+    cubemapToSheen(ibl, fbo);
+
+    sampleGGXLut(ibl, fbo);
+    sampleCharlieLut(ibl, fbo);
+
+    glDeleteFramebuffers(1, &fbo);
+
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glViewport(0, 0, engine.windowWidth, engine.windowHeight);
 }

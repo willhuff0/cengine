@@ -30,14 +30,14 @@ static bool createTexture(Texture** outTexture, uint8_t* data, int width, int he
 
 bool createTextureFromPath(Texture** outTexture, const char* path) {
     int width, height, numChannels;
-    uint8_t* data = stbi_load(path, &width, &height, &numChannels, 0);
+    uint8_t* data = stbi_load(path, &width, &height, &numChannels, 3);
     if (data == NULL) {
         fprintf(stderr, "[TEXTURE] Failed to load image from path: %s\n", path);
         stbi_image_free(data);
         return false;
     }
 
-    return createTexture(outTexture, data, width, height, GL_REPEAT, true);
+    return createTexture(outTexture, data, width, height, GL_REPEAT, false);
 }
 
 bool createTextureFromData(Texture** outTexture, const char* filename, uint8_t* buffer, unsigned int length) {
@@ -87,7 +87,7 @@ bool createCubemapTextureFromPaths(Texture** outTexture, const char* paths[6]) {
     return true;
 }
 
-void createEmptyCubemapTexture(Texture** outTexture, int resolution) {
+void createEmptyCubemapTexture(Texture** outTexture, int resolution, bool withMipmaps) {
     assert(resolution > 0);
 
     GLuint gl_tex;
@@ -95,14 +95,34 @@ void createEmptyCubemapTexture(Texture** outTexture, int resolution) {
     glBindTexture(GL_TEXTURE_CUBE_MAP, gl_tex);
 
     for (unsigned int i = 0; i < 6; ++i) {
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, resolution, resolution, 0, GL_RGB, GL_FLOAT, NULL);
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB32F, resolution, resolution, 0, GL_RGBA, GL_FLOAT, NULL);
     }
+
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, withMipmaps ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+    Texture* texture = malloc(sizeof(Texture));
+    texture->texture = gl_tex;
+    arrput(scene.textures, texture);
+    if (outTexture != NULL) *outTexture = texture;
+}
+
+void createEmptyLutTexture(Texture** outTexture, int resolution) {
+    assert(resolution > 0);
+
+    GLuint gl_tex;
+    glGenTextures(1, &gl_tex);
+    glBindTexture(GL_TEXTURE_2D, gl_tex);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, resolution, resolution, 0, GL_RGBA, GL_FLOAT, NULL);
 
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
     Texture* texture = malloc(sizeof(Texture));
     texture->texture = gl_tex;
@@ -124,12 +144,12 @@ bool createHDRITextureFromPath(Texture** outTexture, const char* path) {
     GLuint gl_tex;
     glGenTextures(1, &gl_tex);
     glBindTexture(GL_TEXTURE_2D, gl_tex);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, data);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width, height, 0, GL_RGBA, GL_FLOAT, data);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 
     stbi_image_free(data);
 
@@ -148,4 +168,9 @@ void deleteTexture(Texture* texture) {
 void bindTexture(Texture* texture, GLenum slot) {
     glActiveTexture(slot);
     glBindTexture(GL_TEXTURE_2D, texture->texture);
+}
+
+void bindCubemapTexture(Texture* texture, GLenum slot) {
+    glActiveTexture(slot);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, texture->texture);
 }

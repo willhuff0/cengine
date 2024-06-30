@@ -8,6 +8,8 @@
 #include "ibl.h"
 #include "scene.h"
 
+Texture* lightmapTexture;
+
 PbrMaterial* createPbrMaterial(ShaderProgram* shader) {
     PbrMaterial* material = malloc(sizeof(PbrMaterial));
     material->shader = shader;
@@ -28,6 +30,12 @@ void bindPbrMaterial(const PbrMaterial* material) {
     if (material->roughness != NULL) bindTexture(material->roughness, GL_TEXTURE2);
     if (material->metallic != NULL) bindTexture(material->metallic, GL_TEXTURE3);
     if (material->ao != NULL) bindTexture(material->ao, GL_TEXTURE4);
+
+    bindTexture(scene.ibl.ggxLutTexture, GL_TEXTURE5);
+    bindCubemapTexture(scene.ibl.lambertianTexture, GL_TEXTURE6);
+    bindCubemapTexture(scene.ibl.ggxTexture, GL_TEXTURE7);
+
+    //bindTexture(lightmapTexture, GL_TEXTURE8);
 }
 
 void deletePbrMaterial(PbrMaterial* material) {

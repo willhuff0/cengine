@@ -33,11 +33,13 @@ typedef struct {
 bool createTextureFromPath(Texture** outTexture, const char* path);
 bool createTextureFromData(Texture** outTexture, const char* filename, uint8_t* buffer, unsigned int length);
 bool createCubemapTextureFromPaths(Texture** outTexture, const char* paths[6]);
-void createEmptyCubemapTexture(Texture** outTexture, int resolution);
+void createEmptyCubemapTexture(Texture** outTexture, int resolution, bool withMipmaps);
+void createEmptyLutTexture(Texture** outTexture, int resolution);
 bool createHDRITextureFromPath(Texture** outTexture, const char* path);
 
 void deleteTexture(Texture* texture);
 
 void bindTexture(Texture* texture, GLuint slot);
+void bindCubemapTexture(Texture* texture, GLuint slot);
 
 #endif //TEXTURE_H

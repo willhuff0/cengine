@@ -9,9 +9,10 @@ layout (binding = 1) uniform sampler2D u_tex_normal;
 layout (binding = 2) uniform sampler2D u_tex_roughness;
 layout (binding = 3) uniform sampler2D u_tex_metallic;
 layout (binding = 4) uniform sampler2D u_tex_ao;
-//layout (binding = 5) uniform sampler2D u_GGXLUT;
-//layout (binding = 6) uniform samplerCube u_cubemap;
-//layout (binding = 7) uniform samplerCube u_irradiance;
+layout (binding = 5) uniform sampler2D u_GGXLUT;
+layout (binding = 6) uniform samplerCube u_LambertianEnvSampler;
+layout (binding = 7) uniform samplerCube u_GGXEnvSampler;
+layout (binding = 8) uniform sampler2D u_lightmap;
 
 layout (std140, binding = 1) uniform CEnginePbr {
     vec4 viewPos;
@@ -20,7 +21,8 @@ layout (std140, binding = 1) uniform CEnginePbr {
 } pbr;
 
 layout (location = 0) in vec2 v_uv;
-layout (location = 1) in PbrTangent {
+layout (location = 1) in vec2 v_lightmapUV;
+layout (location = 2) in PbrTangent {
     vec3 fragPos;
     vec3 viewPos;
     vec3 lightDir;
@@ -36,6 +38,16 @@ float clampedDot(vec3 x, vec3 y)
     return clamp(dot(x, y), 0.0, 1.0);
 }
 
+vec3 getDiffuseLight(vec3 n)
+{
+    return texture(u_LambertianEnvSampler, n).rgb;
+}
+
+vec4 getSpecularSample(vec3 reflection, float lod)
+{
+    return textureLod(u_GGXEnvSampler, reflection, lod) * u_EnvIntensity;
+}
+
 //vec3 getIBLRadianceGGX(vec3 n, vec3 v, float roughness, vec3 F0, float specularWeight)
 //{
 //    float NdotV = clampedDot(n, v);
@@ -44,7 +56,7 @@ float clampedDot(vec3 x, vec3 y)
 //
 //    vec2 brdfSamplePoint = clamp(vec2(NdotV, roughness), vec2(0.0, 0.0), vec2(1.0, 1.0));
 //    vec2 f_ab = texture(u_GGXLUT, brdfSamplePoint).rg;
-//    vec4 specularSample = texture(u_cubemap, reflection) * u_EnvIntensity;
+//    vec4 specularSample = getSpecularSample(reflection, lod);
 //
 //    vec3 specularLight = specularSample.rgb;
 //
@@ -63,7 +75,7 @@ float clampedDot(vec3 x, vec3 y)
 //    vec2 brdfSamplePoint = clamp(vec2(NdotV, roughness), vec2(0.0, 0.0), vec2(1.0, 1.0));
 //    vec2 f_ab = texture(u_GGXLUT, brdfSamplePoint).rg;
 //
-//    vec3 irradiance = texture(u_irradiance, n).rgb * u_EnvIntensity;
+//    vec3 irradiance = getDiffuseLight(n);
 //
 //    // see https://bruop.github.io/ibl/#single_scattering_results at Single Scattering Results
 //    // Roughness dependent fresnel, from Fdez-Aguera
@@ -147,41 +159,48 @@ void main() {
     //f_specular += getIBLRadianceGGX(n, v, perceptualRoughness, f0, specularWeight);
     //f_diffuse += getIBLRadianceLambertian(n, v, perceptualRoughness, c_diff, f0, specularWeight);
 
+
+
     vec3 f_diffuse_ibl = f_diffuse;
     vec3 f_specular_ibl = f_specular;
     f_diffuse = vec3(0.0f);
     f_specular = vec3(0.0f);
 
     // For each light
-    vec3 l = normalize(-pbrTangent.lightDir);                        // Vector light pos to frag pos tangent space
-    vec3 h = normalize(l + v);                                       // Half vector
-
-    float NdotL = clampedDot(n, l);
-    float NdotV = clampedDot(n, v);
-    float NdotH = clampedDot(n, h);
-    float LdotH = clampedDot(l, h);
-    float VdotH = clampedDot(v, h);
-
-    if (NdotL > 0.0 || NdotV > 0.0)
-    {
-        vec3 intensity = vec3(pbr.lightIntensity);
-        vec3 l_diffuse = vec3(0.0f);
-        vec3 l_specular = vec3(0.0f);
-
-        l_diffuse += intensity * NdotL *  BRDF_lambertian(f0, f90, c_diff, specularWeight, VdotH);
-        l_specular += intensity * NdotL * BRDF_specularGGX(f0, f90, alphaRoughness, specularWeight, VdotH, NdotL, NdotV, NdotH);
-
-        f_diffuse += l_diffuse;
-        f_specular += l_specular;
-    }
+//    vec3 l = normalize(-pbrTangent.lightDir);                        // Vector light pos to frag pos tangent space
+//    vec3 h = normalize(l + v);                                       // Half vector
+//
+//    float NdotL = clampedDot(n, l);
+//    float NdotV = clampedDot(n, v);
+//    float NdotH = clampedDot(n, h);
+//    float LdotH = clampedDot(l, h);
+//    float VdotH = clampedDot(v, h);
+//
+//    if (NdotL > 0.0 || NdotV > 0.0)
+//    {
+//        vec3 intensity = vec3(pbr.lightIntensity);
+//        vec3 l_diffuse = vec3(0.0f);
+//        vec3 l_specular = vec3(0.0f);
+//
+//        l_diffuse += intensity * NdotL *  BRDF_lambertian(f0, f90, c_diff, specularWeight, VdotH);
+//        l_specular += intensity * NdotL * BRDF_specularGGX(f0, f90, alphaRoughness, specularWeight, VdotH, NdotL, NdotV, NdotH);
+//
+//        f_diffuse += l_diffuse;
+//        f_specular += l_specular;
+//    }
     //
 
     vec3 diffuse;
     vec3 specular;
 
-    float ao = texture(u_tex_ao, v_uv).r;
-    diffuse = f_diffuse + f_diffuse_ibl * ao;
-    specular = f_specular + f_specular_ibl * ao;
+    //float ao = texture(u_tex_ao, v_uv).r;
+    diffuse = f_diffuse + f_diffuse_ibl;
+    specular = f_specular + f_specular_ibl;
 
-    o_fragColor = vec4(diffuse + specular, 1.0f);
+    // Lightmap
+    //vec3 irradiance = texture(u_lightmap, v_lightmapUV).rgb;
+    //diffuse += irradiance * baseColor;
+    o_fragColor = vec4(baseColor, 1.0f);
+
+    //o_fragColor = vec4(diffuse + specular, 1.0f);
 }

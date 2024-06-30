@@ -110,6 +110,11 @@ static PbrMesh* addPbrMesh(struct aiMesh* aiMesh, PbrMaterial** materials) {
         vertex.uv[0] = aiMesh->mTextureCoords[0][i].x;
         vertex.uv[1] = aiMesh->mTextureCoords[0][i].y;
 
+        if (aiMesh->mTextureCoords[1] != NULL) {
+            vertex.lightmapUV[0] = aiMesh->mTextureCoords[1][i].x;
+            vertex.lightmapUV[1] = aiMesh->mTextureCoords[1][i].y;
+        }
+
         vertices[i] = vertex;
     }
 

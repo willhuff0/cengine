@@ -6,6 +6,7 @@
 #define SCENE_H
 
 #include "common.h"
+#include "ibl.h"
 #include "texture.h"
 #include "pbr_mesh.h"
 #include "simple_mesh.h"
@@ -24,6 +25,8 @@ typedef struct {
 typedef struct {
     Camera camera;
     Light light;
+
+    IBL ibl;
 
     Texture** textures;
     ShaderProgram** shaders;

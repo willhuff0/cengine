@@ -8,6 +8,8 @@
 #include "shader.h"
 #include "texture.h"
 
+extern Texture* lightmapTexture;
+
 typedef struct {
     ShaderProgram* shader;
 

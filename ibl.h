@@ -7,12 +7,21 @@
 
 #include "texture.h"
 
-extern Texture* cubemapTexture;
-extern Texture* irradianceTexture;
-extern Texture* ggxLutTexture;
+typedef struct {
+    int mipmapLevels;
+
+    Texture* cubemapTexture;
+    Texture* lambertianTexture;
+    Texture* ggxTexture;
+    Texture* sheenTexture;
+
+    Texture* ggxLutTexture;
+    Texture* charlieLutTexture;
+} IBL;
 
 void initIbl();
-void iblRenderFrame();
 void freeIbl();
+
+void setupSceneIbl(IBL* ibl, Texture* hdriTexture);
 
 #endif //IBL_H
