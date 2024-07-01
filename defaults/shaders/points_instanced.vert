@@ -1,4 +1,5 @@
-#version 310 es
+#version 300 es
+#extension ARB_explicit_uniform_location : enable
 
 layout (location = 0) in vec3 i_pos;
 layout (location = 1) in float i_size;

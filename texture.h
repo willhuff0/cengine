@@ -7,7 +7,7 @@
 
 #include "common.h"
 
-#define DEFAULT_TEXTURE_DIR "C:\\Users\\wehuf\\CLionProjects\\cengine\\defaults\\textures\\"
+#define DEFAULT_TEXTURE_DIR DEFAULT_DIR "textures\\"
 
 #define DEFAULT_TEXTURE_ALBEDO_PATH    DEFAULT_TEXTURE_DIR "albedo_ao.png"
 #define DEFAULT_TEXTURE_NORMAL_PATH    DEFAULT_TEXTURE_DIR "normal.png"

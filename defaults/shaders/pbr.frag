@@ -1,4 +1,5 @@
-#version 310 es
+#version 300 es
+#extension ARB_explicit_uniform_location : enable
 #extension GL_EXT_shader_io_blocks : enable
 precision highp float;
 

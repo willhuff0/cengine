@@ -1,4 +1,5 @@
-#version 310 es
+#version 300 es
+#extension ARB_explicit_uniform_location : enable
 precision highp float;
 
 #define MATH_PI 3.1415926535897932384626433832795

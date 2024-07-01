@@ -7,13 +7,17 @@
 
 #include "common.h"
 
-#define DEFAULT_SHADER_SIMPLE_INSTANCED "C:\\Users\\wehuf\\CLionProjects\\cengine\\defaults\\shaders\\simple_instanced.vert", "C:\\Users\\wehuf\\CLionProjects\\cengine\\defaults\\shaders\\simple_instanced.frag"
-#define DEFAULT_SHADER_POINTS_INSTANCED "C:\\Users\\wehuf\\CLionProjects\\cengine\\defaults\\shaders\\points_instanced.vert", "C:\\Users\\wehuf\\CLionProjects\\cengine\\defaults\\shaders\\simple_instanced.frag"
-#define DEFAULT_SHADER_PBR "C:\\Users\\wehuf\\CLionProjects\\cengine\\defaults\\shaders\\pbr.vert", "C:\\Users\\wehuf\\CLionProjects\\cengine\\defaults\\shaders\\pbr.frag"
+#define DEFAULT_SHADER_DIR DEFAULT_DIR "shaders/"
 
-#define DEFAULT_SHADER_CUBEMAP "C:\\Users\\wehuf\\CLionProjects\\cengine\\defaults\\shaders\\cubemap.vert", "C:\\Users\\wehuf\\CLionProjects\\cengine\\defaults\\shaders\\cubemap.frag"
+#define DEFAULT_SHADER_SIMPLE           DEFAULT_SHADER_DIR "simple.vert",           DEFAULT_SHADER_DIR "simple.frag"
+#define DEFAULT_SHADER_SIMPLE_INSTANCED DEFAULT_SHADER_DIR "simple_instanced.vert", DEFAULT_SHADER_DIR "simple_instanced.frag"
+#define DEFAULT_SHADER_POINTS_INSTANCED DEFAULT_SHADER_DIR "points_instanced.vert", DEFAULT_SHADER_DIR "simple_instanced.frag"
+#define DEFAULT_SHADER_PBR              DEFAULT_SHADER_DIR "pbr.vert",              DEFAULT_SHADER_DIR "pbr.frag"
 
-#define DEFAULT_SHADER_HDRI_TO_CUBEMAP "C:\\Users\\wehuf\\CLionProjects\\cengine\\defaults\\shaders\\fullscreen.vert", "C:\\Users\\wehuf\\CLionProjects\\cengine\\defaults\\shaders\\equirectangular_to_cubemap.frag"
+#define DEFAULT_SHADER_CUBEMAP          DEFAULT_SHADER_DIR "cubemap.vert", DEFAULT_SHADER_DIR "cubemap.frag"
+
+#define DEFAULT_SHADER_HDRI_TO_CUBEMAP  DEFAULT_SHADER_DIR "fullscreen.vert", DEFAULT_SHADER_DIR "equirectangular_to_cubemap.frag"
+//#define DEFAULT_SHADER_IBL_FILTERING    DEFAULT_SHADER_DIR "fullscreen.vert", DEFAULT_SHADER_DIR "ibl_filtering.frag"
 
 typedef struct {
     char* key;

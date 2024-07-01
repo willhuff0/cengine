@@ -1,3 +1,0 @@
-C:/Users/wehuf/CLionProjects/cengine/cmake-build-debug/CMakeFiles/cengine.dir
-C:/Users/wehuf/CLionProjects/cengine/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/Users/wehuf/CLionProjects/cengine/cmake-build-debug/CMakeFiles/rebuild_cache.dir

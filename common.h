@@ -16,6 +16,8 @@
 #include <stb_image.h>
 #include <stb_ds.h>
 
+#define DEFAULT_DIR "/Users/will/CLionProjects/cengine/defaults/"
+
 char* readFile(const char* path);
 
 #endif //COMMON_H
