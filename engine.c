@@ -126,7 +126,7 @@ static void renderFrame() {
         mat4 modelMat;
         glm_mat4_identity(modelMat);
         glm_scale(modelMat, (vec3){0.01f, 0.01f, 0.01f});
-        glUniformMatrix4fv(0, 1, false, modelMat);
+        setUniformMat4(scene.pbrMeshes[i]->material->shader, "u_modelMat", modelMat);
         drawPbrMesh(scene.pbrMeshes[i]);
     }
     debugRenderFrame();

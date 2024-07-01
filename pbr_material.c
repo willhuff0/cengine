@@ -31,10 +31,6 @@ void bindPbrMaterial(const PbrMaterial* material) {
     if (material->metallic != NULL) bindTexture(material->metallic, GL_TEXTURE3);
     if (material->ao != NULL) bindTexture(material->ao, GL_TEXTURE4);
 
-    bindTexture(scene.ibl.ggxLutTexture, GL_TEXTURE5);
-    bindCubemapTexture(scene.ibl.lambertianTexture, GL_TEXTURE6);
-    bindCubemapTexture(scene.ibl.ggxTexture, GL_TEXTURE7);
-
     //bindTexture(lightmapTexture, GL_TEXTURE8);
 }
 

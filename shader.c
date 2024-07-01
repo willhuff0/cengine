@@ -60,6 +60,21 @@ static bool createShader(GLuint* shader, const char* path, GLenum type) {
     }
 }
 
+static void lookupShaderUniformLocations(ShaderProgram* sp) {
+    int numUniforms;
+    glGetProgramiv(sp->program, GL_ACTIVE_UNIFORMS, &numUniforms);
+
+    for (unsigned int i = 0; i < numUniforms; ++i) {
+        int nameLength;
+        glGetActiveUniformsiv(sp->program, 1, &i, GL_UNIFORM_NAME_LENGTH, &nameLength);
+
+        char nameBuffer[nameLength];
+        glGetActiveUniform(sp->program, i, nameBuffer, NULL, NULL, NULL, nameBuffer);
+        int location = glGetUniformLocation(sp->program, nameBuffer);
+        shput(sp->uniformLocations, nameBuffer, location);
+    }
+}
+
 bool createShaderProgram(ShaderProgram** outSp, const char* vertPath, const char* fragPath) {
     GLuint vertShader;
     if (!createShader(&vertShader, vertPath, GL_VERTEX_SHADER)) {
@@ -91,6 +106,9 @@ bool createShaderProgram(ShaderProgram** outSp, const char* vertPath, const char
 
     ShaderProgram* sp = malloc(sizeof(ShaderProgram));
     sp->program = program;
+
+    lookupShaderUniformLocations(sp);
+
     arrput(scene.shaders, sp);
     if (outSp != NULL) *outSp = sp;
     return true;
@@ -98,9 +116,36 @@ bool createShaderProgram(ShaderProgram** outSp, const char* vertPath, const char
 
 void deleteShaderProgram(ShaderProgram* sp) {
     glDeleteProgram(sp->program);
+    shfree(sp->uniformLocations);
     free(sp);
 }
 
 void bindShaderProgram(ShaderProgram* sp) {
     glUseProgram(sp->program);
+}
+
+int getUniformLocation(ShaderProgram* sp, const char* name) {
+    return shget(sp->uniformLocations, name);
+}
+
+void setUniformBool(ShaderProgram* sp, const char* name, bool value) {
+    setUniformInt(sp, name, value ? 1 : 0);
+}
+void setUniformInt(ShaderProgram* sp, const char* name, int value) {
+    glUniform1i(getUniformLocation(sp, name), value);
+}
+void setUniformFloat(ShaderProgram* sp, const char* name, float value) {
+    glUniform1f(getUniformLocation(sp, name), value);
+}
+void setUniformVec2(ShaderProgram* sp, const char* name, vec2 value) {
+    glUniform2f(getUniformLocation(sp, name), value[0], value[1]);
+}
+void setUniformVec3(ShaderProgram* sp, const char* name, vec3 value) {
+    glUniform3f(getUniformLocation(sp, name), value[0], value[1], value[2]);
+}
+void setUniformVec4(ShaderProgram* sp, const char* name, vec4 value) {
+    glUniform4f(getUniformLocation(sp, name), value[0], value[1], value[2], value[3]);
+}
+void setUniformMat4(ShaderProgram* sp, const char* name, mat4 value) {
+    glUniformMatrix4fv(getUniformLocation(sp, name), 1, false, value);
 }
