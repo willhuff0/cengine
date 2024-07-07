@@ -10,6 +10,10 @@
 void createSimpleMaterial(SimpleMaterial** outMaterial, ShaderProgram* shader) {
     SimpleMaterial* material = malloc(sizeof(SimpleMaterial));
     material->shader = shader;
+
+    bindShaderProgram(shader);
+    glUniformBlockBinding(shader->program, glGetUniformBlockIndex(shader->program, "CEngine"), 0);
+
     arrput(scene.simpleMaterials, material);
     if (outMaterial != NULL) *outMaterial = material;
 }

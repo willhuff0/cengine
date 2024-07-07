@@ -26,7 +26,17 @@ add_executable(cengine main.c
         simple_material.c
         pbr_mesh.c
         ibl.c
-        ibl.h
+        skybox.c
+        physics.c
+        node.c
+        component.c
+        components/mesh_comp.c
+        components/trans_comp.c
+        draw_queue.c
+        components/debug_draw_comp.c
+        components/debug_draw_comp.h
+        fps_counter.c
+        fps_counter.h
 )
 
 target_include_directories(cengine PRIVATE ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/include/angle)
@@ -47,6 +57,7 @@ elseif(APPLE)
             ${PROJECT_SOURCE_DIR}/libs/osx/libEGL.dylib
             ${PROJECT_SOURCE_DIR}/libs/osx/libassimp.5.4.1.dylib
             ${PROJECT_SOURCE_DIR}/libs/osx/libcglm.a
+            ${PROJECT_SOURCE_DIR}/libs/osx/libode.dylib
     )
 elseif(UNIX)
     message(FATAL_ERROR "Unix is not supported")

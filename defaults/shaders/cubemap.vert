@@ -1,13 +1,12 @@
 #version 300 es
-#extension ARB_explicit_uniform_location : enable
 
 layout(location = 0) in vec3 a_pos;
 
-layout (std140, binding = 0) uniform CEngine {
+layout (std140) uniform CEngine {
     mat4 viewProjMat;
 } cengine;
 
-layout (location = 0) out vec3 v_uv;
+out vec3 v_uv;
 
 void main() {
     v_uv = a_pos;

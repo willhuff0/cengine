@@ -10,14 +10,14 @@
 #include "engine.h"
 #include "scene.h"
 
-static void printShaderInfoLog(GLuint shader, GLenum type) {
+static void printShaderInfoLog(GLuint shader, GLenum type, const char* path) {
     GLint infoLogLength;
     glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength);
 
     char* buffer = malloc(infoLogLength);
     glGetShaderInfoLog(shader, infoLogLength, NULL, buffer);
 
-    fprintf(stderr, "[SHADER] Failed to compile %s shader: %s\n", type == GL_VERTEX_SHADER ? "vertex" : "fragment", buffer);
+    fprintf(stderr, "[SHADER] Failed to compile %s shader (%s): %s\n", type == GL_VERTEX_SHADER ? "vertex" : "fragment", path, buffer);
     free(buffer);
 }
 
@@ -32,13 +32,13 @@ static void printProgramInfoLog(GLuint program) {
     free(buffer);
 }
 
-static bool compileShader(GLuint shader, GLenum type) {
+static bool compileShader(GLuint shader, GLenum type, const char* path) {
     glCompileShader(shader);
 
     GLint compiled;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
     if (compiled != GL_TRUE) {
-        printShaderInfoLog(shader, type);
+        printShaderInfoLog(shader, type, path);
         return false;
     }
 
@@ -52,7 +52,7 @@ static bool createShader(GLuint* shader, const char* path, GLenum type) {
     glShaderSource(*shader, 1, &source, NULL);
     free(source);
 
-    if (compileShader(*shader, type)) {
+    if (compileShader(*shader, type, path)) {
         return true;
     } else {
         glDeleteShader(*shader);
@@ -68,8 +68,10 @@ static void lookupShaderUniformLocations(ShaderProgram* sp) {
         int nameLength;
         glGetActiveUniformsiv(sp->program, 1, &i, GL_UNIFORM_NAME_LENGTH, &nameLength);
 
-        char nameBuffer[nameLength];
-        glGetActiveUniform(sp->program, i, nameBuffer, NULL, NULL, NULL, nameBuffer);
+        char* nameBuffer = malloc(nameLength * sizeof(char));
+        int length, size;
+        GLuint type;
+        glGetActiveUniform(sp->program, i, nameLength, &length, &size, &type, nameBuffer);
         int location = glGetUniformLocation(sp->program, nameBuffer);
         shput(sp->uniformLocations, nameBuffer, location);
     }
@@ -106,7 +108,9 @@ bool createShaderProgram(ShaderProgram** outSp, const char* vertPath, const char
 
     ShaderProgram* sp = malloc(sizeof(ShaderProgram));
     sp->program = program;
+    sp->uniformLocations = NULL;
 
+    shdefault(sp->uniformLocations, -1);
     lookupShaderUniformLocations(sp);
 
     arrput(scene.shaders, sp);
@@ -125,7 +129,9 @@ void bindShaderProgram(ShaderProgram* sp) {
 }
 
 int getUniformLocation(ShaderProgram* sp, const char* name) {
-    return shget(sp->uniformLocations, name);
+    int location = shget(sp->uniformLocations, name);
+    assert(location != -1); // -1: uniform does not exist
+    return location;
 }
 
 void setUniformBool(ShaderProgram* sp, const char* name, bool value) {

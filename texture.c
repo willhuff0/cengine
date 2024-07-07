@@ -6,6 +6,16 @@
 
 #include "scene.h"
 
+static bool getTextureFromCache(Texture** outTexture, const char* path) {
+    TextureCacheEntry* entry = shgetp_null(scene.textureCache, path);
+    if (entry != NULL) {
+        if (outTexture != NULL) *outTexture = entry->value;
+        return true;
+    } else {
+        return false;
+    }
+}
+
 static bool createTexture(Texture** outTexture, uint8_t* data, int width, int height, GLenum wrap, bool generateMipMaps) {
     GLuint gl_tex;
     glGenTextures(1, &gl_tex);
@@ -29,6 +39,8 @@ static bool createTexture(Texture** outTexture, uint8_t* data, int width, int he
 }
 
 bool createTextureFromPath(Texture** outTexture, const char* path) {
+    if (getTextureFromCache(outTexture, path)) return true;
+
     int width, height, numChannels;
     uint8_t* data = stbi_load(path, &width, &height, &numChannels, 3);
     if (data == NULL) {
@@ -37,7 +49,12 @@ bool createTextureFromPath(Texture** outTexture, const char* path) {
         return false;
     }
 
-    return createTexture(outTexture, data, width, height, GL_REPEAT, false);
+    if (createTexture(outTexture, data, width, height, GL_REPEAT, false)) {
+        shput(scene.textureCache, path, *outTexture);
+        return true;
+    } else {
+        return false;
+    }
 }
 
 bool createTextureFromData(Texture** outTexture, const char* filename, uint8_t* buffer, unsigned int length) {
@@ -95,7 +112,7 @@ void createEmptyCubemapTexture(Texture** outTexture, int resolution, bool withMi
     glBindTexture(GL_TEXTURE_CUBE_MAP, gl_tex);
 
     for (unsigned int i = 0; i < 6; ++i) {
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB32F, resolution, resolution, 0, GL_RGBA, GL_FLOAT, NULL);
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, resolution, resolution, 0, GL_RGB, GL_FLOAT, NULL);
     }
 
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -110,27 +127,29 @@ void createEmptyCubemapTexture(Texture** outTexture, int resolution, bool withMi
     if (outTexture != NULL) *outTexture = texture;
 }
 
-void createEmptyLutTexture(Texture** outTexture, int resolution) {
-    assert(resolution > 0);
-
-    GLuint gl_tex;
-    glGenTextures(1, &gl_tex);
-    glBindTexture(GL_TEXTURE_2D, gl_tex);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, resolution, resolution, 0, GL_RGBA, GL_FLOAT, NULL);
-
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    Texture* texture = malloc(sizeof(Texture));
-    texture->texture = gl_tex;
-    arrput(scene.textures, texture);
-    if (outTexture != NULL) *outTexture = texture;
-}
+// void createEmptyLutTexture(Texture** outTexture, int resolution) {
+//     assert(resolution > 0);
+//
+//     GLuint gl_tex;
+//     glGenTextures(1, &gl_tex);
+//     glBindTexture(GL_TEXTURE_2D, gl_tex);
+//
+//     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, resolution, resolution, 0, GL_RGBA, GL_FLOAT, NULL);
+//
+//     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+//     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+//     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+//
+//     Texture* texture = malloc(sizeof(Texture));
+//     texture->texture = gl_tex;
+//     arrput(scene.textures, texture);
+//     if (outTexture != NULL) *outTexture = texture;
+// }
 
 bool createHDRITextureFromPath(Texture** outTexture, const char* path) {
+    if (getTextureFromCache(outTexture, path)) return true;
+
     int width, height, numChannels;
     stbi_set_flip_vertically_on_load(true);
     float* data = stbi_loadf(path, &width, &height, &numChannels, 0);
@@ -144,7 +163,7 @@ bool createHDRITextureFromPath(Texture** outTexture, const char* path) {
     GLuint gl_tex;
     glGenTextures(1, &gl_tex);
     glBindTexture(GL_TEXTURE_2D, gl_tex);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width, height, 0, GL_RGBA, GL_FLOAT, data);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, data);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -156,6 +175,7 @@ bool createHDRITextureFromPath(Texture** outTexture, const char* path) {
     Texture* texture = malloc(sizeof(Texture));
     texture->texture = gl_tex;
     arrput(scene.textures, texture);
+    shput(scene.textureCache, path, texture);
     if (outTexture != NULL) *outTexture = texture;
     return true;
 }

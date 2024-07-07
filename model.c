@@ -110,10 +110,8 @@ static PbrMesh* addPbrMesh(struct aiMesh* aiMesh, PbrMaterial** materials) {
         vertex.uv[0] = aiMesh->mTextureCoords[0][i].x;
         vertex.uv[1] = aiMesh->mTextureCoords[0][i].y;
 
-        if (aiMesh->mTextureCoords[1] != NULL) {
-            vertex.lightmapUV[0] = aiMesh->mTextureCoords[1][i].x;
-            vertex.lightmapUV[1] = aiMesh->mTextureCoords[1][i].y;
-        }
+        vertex.lightmapUV[0] = aiMesh->mTextureCoords[1][i].x;
+        vertex.lightmapUV[1] = aiMesh->mTextureCoords[1][i].y;
 
         vertices[i] = vertex;
     }
@@ -141,7 +139,7 @@ static void addFileTexture(Texture** texture, const char* dir, const char* path)
     int length = dirLen + pathLen + 2;
     char* absolutePath = malloc(length);
     memcpy(absolutePath, dir, dirLen);
-    absolutePath[dirLen] = '\\';
+    absolutePath[dirLen] = DIR[0];
     memcpy(absolutePath + dirLen + 1, path, pathLen);
     absolutePath[length - 1] = '\0';
 
@@ -182,11 +180,15 @@ static void addTexture(const struct aiScene* aiScene, Texture** texture, enum ai
 static PbrMaterial* addPbrMaterial(const struct aiScene* aiScene, ShaderProgram* shader, const char* dir, struct aiMaterial* aiMat) {
     PbrMaterial* material = createPbrMaterial(shader);
 
-    addTexture(aiScene, &material->albedo,    aiTextureType_BASE_COLOR,        dir, DEFAULT_TEXTURE_ALBEDO_PATH, aiMat);
-    addTexture(aiScene, &material->normal,    aiTextureType_NORMALS,           dir, DEFAULT_TEXTURE_NORMAL_PATH, aiMat);
-    addTexture(aiScene, &material->roughness, aiTextureType_DIFFUSE_ROUGHNESS, dir, DEFAULT_TEXTURE_ROUGHNESS_PATH, aiMat);
-    addTexture(aiScene, &material->metallic,  aiTextureType_METALNESS,         dir, DEFAULT_TEXTURE_METALLIC_PATH, aiMat);
-    addTexture(aiScene, &material->ao,        aiTextureType_AMBIENT_OCCLUSION, dir, DEFAULT_TEXTURE_AO_PATH, aiMat);
+    if (aiGetMaterialColor(aiMat, AI_MATKEY_COLOR_DIFFUSE, material->albedo) != AI_SUCCESS || true) glm_vec4_copy((vec4){1.0f, 1.0f, 1.0f, 1.0f}, material->albedo);
+    if (aiGetMaterialFloatArray(aiMat, AI_MATKEY_ROUGHNESS_FACTOR, &material->roughness, 0) != AI_SUCCESS || true) material->roughness = 1.0f;
+    if (aiGetMaterialFloatArray(aiMat, AI_MATKEY_METALLIC_FACTOR, &material->metallic, 0) != AI_SUCCESS || true) material->metallic = 0.0f;
+
+    addTexture(aiScene, &material->albedoTex,    aiTextureType_BASE_COLOR,        dir, DEFAULT_TEXTURE_ALBEDO_PATH, aiMat);
+    addTexture(aiScene, &material->normalTex,    aiTextureType_NORMALS,           dir, DEFAULT_TEXTURE_NORMAL_PATH, aiMat);
+    addTexture(aiScene, &material->roughnessTex, aiTextureType_DIFFUSE_ROUGHNESS, dir, DEFAULT_TEXTURE_ROUGHNESS_PATH, aiMat);
+    addTexture(aiScene, &material->metallicTex,  aiTextureType_METALNESS,         dir, DEFAULT_TEXTURE_METALLIC_PATH, aiMat);
+    addTexture(aiScene, &material->aoTex,        aiTextureType_AMBIENT_OCCLUSION, dir, DEFAULT_TEXTURE_AO_PATH, aiMat);
 
     return material;
 }

@@ -18,7 +18,7 @@ static float lookY = -90.0f;
 
 void setupFlyCamera() {
     glfwSetInputMode(engine.window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    glfwSetInputMode(engine.window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+    if (glfwRawMouseMotionSupported()) glfwSetInputMode(engine.window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
 }
 
 void tickFlyCamera(float delta) {

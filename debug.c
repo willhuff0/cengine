@@ -5,6 +5,7 @@
 #include "debug.h"
 
 #include "common.h"
+#include "engine.h"
 #include "model.h"
 #include "simple_mesh.h"
 
@@ -36,6 +37,9 @@ void initDebug() {
         exit(98);
     }
 
+    bindShaderProgram(pointsShader);
+    glUniformBlockBinding(pointsShader->program, glGetUniformBlockIndex(pointsShader->program, "CEngine"), 0);
+
     glGenVertexArrays(1, &pointsVao);
     glBindVertexArray(pointsVao);
 
@@ -55,6 +59,9 @@ void initDebug() {
         printf("[DEBUG] Failed to load default simple instanced shader.\n");
         exit(99);
     }
+
+    bindShaderProgram(shader);
+    glUniformBlockBinding(shader->program, glGetUniformBlockIndex(shader->program, "CEngine"), 0);
 
     SimpleModel volumeModel;
     loadSimpleModel(&volumeModel, shader, DEFAULT_MODEL_SHAPES_CUBE);

@@ -7,7 +7,7 @@
 
 #include "common.h"
 
-#define DEFAULT_SHADER_DIR DEFAULT_DIR "shaders/"
+#define DEFAULT_SHADER_DIR DEFAULT_DIR "shaders" DIR
 
 #define DEFAULT_SHADER_SIMPLE           DEFAULT_SHADER_DIR "simple.vert",           DEFAULT_SHADER_DIR "simple.frag"
 #define DEFAULT_SHADER_SIMPLE_INSTANCED DEFAULT_SHADER_DIR "simple_instanced.vert", DEFAULT_SHADER_DIR "simple_instanced.frag"
@@ -16,8 +16,7 @@
 
 #define DEFAULT_SHADER_CUBEMAP          DEFAULT_SHADER_DIR "cubemap.vert", DEFAULT_SHADER_DIR "cubemap.frag"
 
-#define DEFAULT_SHADER_HDRI_TO_CUBEMAP  DEFAULT_SHADER_DIR "fullscreen.vert", DEFAULT_SHADER_DIR "equirectangular_to_cubemap.frag"
-//#define DEFAULT_SHADER_IBL_FILTERING    DEFAULT_SHADER_DIR "fullscreen.vert", DEFAULT_SHADER_DIR "ibl_filtering.frag"
+#define DEFAULT_SHADER_HDRI_TO_CUBEMAP  DEFAULT_SHADER_DIR "equirectangular_to_cubemap.vert", DEFAULT_SHADER_DIR "equirectangular_to_cubemap.frag"
 
 typedef struct {
     char* key;

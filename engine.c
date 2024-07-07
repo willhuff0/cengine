@@ -8,14 +8,16 @@
 
 #include "debug.h"
 #include "fly_camera.h"
-#include "fps_player.h"
+#include "fps_counter.h"
 #include "ibl.h"
+#include "physics.h"
 #include "scene.h"
 
-#define DEFAULT_WINDOW_WIDTH  1920/1.25
-#define DEFAULT_WINDOW_HEIGHT 1080/1.25
+#define DEFAULT_WINDOW_WIDTH  1440/1.25
+#define DEFAULT_WINDOW_HEIGHT 900/1.25
 
 Engine engine;
+FrameArgs frameArgs;
 
 static void printEngineInfo() {
     printf("GLFW version:   %s\n", glfwGetVersionString());
@@ -28,6 +30,7 @@ static void glfw_ErrorCallback(int error, const char* description) {
 }
 
 static void glfw_FramebufferResizeCallback(GLFWwindow* window, int width, int height) {
+    printf("%d, %d\n", width, height);
     glViewport(0, 0, engine.windowWidth = width, engine.windowHeight = height);
 }
 
@@ -42,7 +45,7 @@ void initEngine() {
 
     glfwSetErrorCallback(glfw_ErrorCallback);
 
-    glfwInitHint(GLFW_ANGLE_PLATFORM_TYPE, GLFW_ANGLE_PLATFORM_TYPE_OPENGLES);
+    glfwInitHint(GLFW_ANGLE_PLATFORM_TYPE, GLFW_ANGLE_PLATFORM_TYPE_METAL);
     if (!glfwInit()) {
         error("Failed to initialize glfw.");
         return;
@@ -74,14 +77,14 @@ void initEngine() {
 
     glfwSwapInterval(1);
 
+    glfwGetFramebufferSize(window, &engine.windowWidth, &engine.windowHeight);
     glViewport(0, 0, engine.windowWidth, engine.windowHeight);
     glfwSetFramebufferSizeCallback(window, glfw_FramebufferResizeCallback);
 
     glEnable(GL_DEPTH_TEST);
-    // glEnable(GL_BLEND);
-    // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    //
-    // glEnable(GL_CULL_FACE);
+    //glEnable(GL_BLEND);
+    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_CULL_FACE);
 
     //glClearColor(0.0f, 0.3f, 0.4f, 1.0f);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -97,7 +100,8 @@ void initEngine() {
     glBufferData(GL_UNIFORM_BUFFER, sizeof(CEnginePbr), NULL, GL_STATIC_DRAW);
     glBindBufferBase(GL_UNIFORM_BUFFER, 1, engine.cenginePbrUbo);
 
-    initIbl();
+    initSkybox();
+    initPhysics();
 
     printEngineInfo();
 }
@@ -114,22 +118,25 @@ static void makeViewProjMat(mat4 viewProjMat) {
     glm_mat4_mul(proj, view, viewProjMat);
 }
 
-FrameArgs frameArgs;
-
 static void tick() {
     tickFlyCamera(frameArgs.deltaTime);
+
+    for (int i = 0; i < arrlen(scene.nodes); ++i) {
+        tickNode(scene.nodes[i]);
+    }
 }
 
 static void renderFrame() {
-    for (int i = 0; i < arrlen(scene.pbrMeshes); ++i) {
-        bindPbrMesh(scene.pbrMeshes[i]);
-        mat4 modelMat;
-        glm_mat4_identity(modelMat);
-        glm_scale(modelMat, (vec3){0.01f, 0.01f, 0.01f});
-        setUniformMat4(scene.pbrMeshes[i]->material->shader, "u_modelMat", modelMat);
-        drawPbrMesh(scene.pbrMeshes[i]);
+    initDrawQueue(&frameArgs.queue);
+
+    for (int i = 0; i < arrlen(scene.nodes); ++i) {
+        drawNode(scene.nodes[i]);
     }
+    executeDrawQueue(&frameArgs.queue);
+    freeDrawQueue(&frameArgs.queue);
+
     debugRenderFrame();
+    skyboxRenderFrame();
 }
 
 void engineLoop() {
@@ -138,14 +145,17 @@ void engineLoop() {
     setupFlyCamera();
 
     double lastTime = glfwGetTime();
+    startFpsCounter();
     while(!glfwWindowShouldClose(engine.window)) {
         glfwPollEvents();
 
         if (glfwGetKey(engine.window, GLFW_KEY_ESCAPE) == GLFW_PRESS) glfwSetWindowShouldClose(engine.window, GLFW_TRUE);
+        if (glfwGetKey(engine.window, GLFW_KEY_P) == GLFW_PRESS) glfwSetInputMode(engine.window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
         double time = glfwGetTime();
         double deltaTime = time - lastTime;
         lastTime = time;
+        tickFpsCounter();
 
         frameArgs = (FrameArgs) {time, deltaTime};
         makeViewProjMat(frameArgs.viewProjMat);
@@ -163,10 +173,10 @@ void engineLoop() {
         glBindBuffer(GL_UNIFORM_BUFFER, engine.cenginePbrUbo);
         glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(CEnginePbr), &frameArgs.pbr);
 
-        debugDrawPoint((vec3){0.0f, 0.0f, 0.0f}, 3.0f, (vec4){0.0f, 1.0f, 0.0f, 1.0f});
-        debugDrawPoint((vec3){0.0f, 3.0f, 0.0f}, 3.0f, (vec4){1.0f, 0.0f, 0.0f, 0.5f});
-        debugDrawPoint((vec3){3.0f, 0.0f, 0.0f}, 3.0f, (vec4){1.0f, 0.0f, 0.0f, 1.0f});
-        debugDrawPoint((vec3){0.0f, 0.0f, 3.0f}, 3.0f, (vec4){1.0f, 0.0f, 0.0f, 1.0f});
+        // debugDrawPoint((vec3){0.0f, 0.0f, 0.0f}, 3.0f, (vec4){0.0f, 1.0f, 0.0f, 1.0f});
+        // debugDrawPoint((vec3){0.0f, 3.0f, 0.0f}, 3.0f, (vec4){1.0f, 0.0f, 0.0f, 0.5f});
+        // debugDrawPoint((vec3){3.0f, 0.0f, 0.0f}, 3.0f, (vec4){1.0f, 0.0f, 0.0f, 1.0f});
+        // debugDrawPoint((vec3){0.0f, 0.0f, 3.0f}, 3.0f, (vec4){1.0f, 0.0f, 0.0f, 1.0f});
 
         //debugDrawVolume((vec3){10.0, 10.0, -15.0}, (vec3){20.0f, 10.0f, 15.0f}, (vec4){1.0, 0.5f, 0.5f, 0.5f});
         //debugDrawSphere((vec3){10.0, -10.0, -20.0}, 5.0f, (vec4){1.0, 0.5f, 1.0f, 0.25f});
@@ -180,7 +190,8 @@ void engineLoop() {
 }
 
 void freeEngine() {
-    freeIbl();
+    freeSkybox();
+    freePhysics();
 
     glDeleteBuffers(1, &engine.cengineUbo);
     glDeleteBuffers(1, &engine.cenginePbrUbo);

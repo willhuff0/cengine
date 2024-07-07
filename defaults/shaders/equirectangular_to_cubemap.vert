@@ -1,12 +1,11 @@
 #version 300 es
-#extension ARB_explicit_uniform_location : enable
 
 layout (location = 0) in vec3 a_pos;
 
-layout (location = 0) uniform mat4 u_projMat;
-layout (location = 1) uniform mat4 u_viewMat;
+uniform mat4 u_projMat;
+uniform mat4 u_viewMat;
 
-layout (location = 0) out vec3 v_localPos;
+out vec3 v_localPos;
 
 void main() {
     v_localPos = a_pos;

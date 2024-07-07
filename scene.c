@@ -21,6 +21,9 @@ static void initScene() {
     scene.simpleMeshes = NULL;
     scene.pbrMaterials = NULL;
     scene.pbrMeshes = NULL;
+    scene.nodes = NULL;
+
+    scene.textureCache = NULL;
 }
 
 // typedef enum {
@@ -144,6 +147,13 @@ void unloadScene() {
         deletePbrMesh(scene.pbrMeshes[i]);
     }
     arrfree(scene.pbrMeshes);
+
+    for (int i = 0; i < arrlen(scene.nodes); ++i) {
+        deleteNode(scene.nodes[i]);
+    }
+    arrfree(scene.nodes);
+
+    shfree(scene.textureCache);
 
     initScene();
 }

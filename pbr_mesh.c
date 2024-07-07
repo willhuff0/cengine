@@ -32,8 +32,6 @@ void createPbrMesh(PbrMesh** outMesh, PbrMaterial* material, unsigned int numVer
     glVertexAttribPointer(3, 2, GL_FLOAT, false, sizeof(PbrVertex), (void*)offsetof(PbrVertex, uv));         // UVs
     glVertexAttribPointer(4, 2, GL_FLOAT, false, sizeof(PbrVertex), (void*)offsetof(PbrVertex, lightmapUV)); // LightmapUVs
 
-    glBindVertexArray(0);
-
     PbrMesh* mesh = malloc(sizeof(PbrMesh));
     mesh->material = material;
     mesh->vao = vao;

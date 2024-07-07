@@ -1,38 +1,23 @@
 #version 300 es
-#extension ARB_explicit_uniform_location : enable
 precision highp float;
 
-#define MATH_PI 3.1415926535897932384626433832795
-
-layout (location = 0) in vec2 v_texCoord;
 out vec4 o_fragColor;
 
-layout (location = 0) uniform int u_currentFace;
+uniform sampler2D u_equirectangularMap;
 
-layout (binding = 0) uniform sampler2D u_equirectangularMap;
+in vec3 v_localPos;
 
-vec3 uvToXYZ(int face, vec2 uv) {
-    if (face == 0) return vec3(1.0f, uv.y, -uv.x);
-    if (face == 1) return vec3(-1.0f, uv.y, uv.x);
-    if (face == 2) return vec3(uv.x, -1.0f, uv.y);
-    if (face == 3) return vec3(uv.x, 1.0f, -uv.y);
-    if (face == 4) return vec3(uv.x, uv.y, 1.0f);
-    if (face == 5) return vec3(-uv.x, uv.y, -1.0f);
-}
-
-vec2 dirToUv(vec3 dir) {
-    return vec2(0.5f * 0.5f * atan(dir.z, dir.x) / MATH_PI, 1.0f - acos(dir.y) / MATH_PI);
-}
-
-vec3 equirectangularToCubeMap(int face, vec2 texCoord) {
-    vec2 texCoordNew = texCoord * 2.0f - 1.0f;
-    vec3 scan = uvToXYZ(face, texCoordNew);
-    vec3 dir = normalize(scan);
-    vec2 src = dirToUv(dir);
-
-    return texture(u_equirectangularMap, src).rgb;
+const vec2 invAtan = vec2(0.1591, 0.3183);
+vec2 sampleSphericalMap(vec3 v) {
+    vec2 uv = vec2(atan(v.z, v.x), asin(v.y));
+    uv *= invAtan;
+    uv += 0.5f;
+    return uv;
 }
 
 void main() {
-    o_fragColor = vec4(equirectangularToCubeMap(u_currentFace, v_texCoord), 1.0f);
+    vec2 uv = sampleSphericalMap(normalize(v_localPos));
+    vec3 color = texture(u_equirectangularMap, uv).rgb;
+
+    o_fragColor = vec4(color, 1.0f);
 }

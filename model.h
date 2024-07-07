@@ -11,10 +11,12 @@
 #include "shader.h"
 #include "simple_mesh.h"
 
-#define DEFAULT_MODEL_SHAPES_CUBE              "C:\\Users\\wehuf\\CLionProjects\\cengine\\defaults\\shapes\\cube.obj"
-#define DEFAULT_MODEL_SHAPES_ICOSAHEDRON       "C:\\Users\\wehuf\\CLionProjects\\cengine\\defaults\\shapes\\icosahedron.obj"
-#define DEFAULT_MODEL_SHAPES_ICOSPHERE         "C:\\Users\\wehuf\\CLionProjects\\cengine\\defaults\\shapes\\icosphere.obj"
-#define DEFAULT_MODEL_SHAPES_ICOSPHERE_HIGHRES "C:\\Users\\wehuf\\CLionProjects\\cengine\\defaults\\shapes\\icosphere_highres.obj"
+#define DEFAULT_MODEL_DIR DEFAULT_DIR "shapes" DIR
+
+#define DEFAULT_MODEL_SHAPES_CUBE              DEFAULT_MODEL_DIR "cube.obj"
+#define DEFAULT_MODEL_SHAPES_ICOSAHEDRON       DEFAULT_MODEL_DIR "icosahedron.obj"
+#define DEFAULT_MODEL_SHAPES_ICOSPHERE         DEFAULT_MODEL_DIR "icosphere.obj"
+#define DEFAULT_MODEL_SHAPES_ICOSPHERE_HIGHRES DEFAULT_MODEL_DIR "icosphere_highres.obj"
 
 typedef struct {
     int numMeshes;

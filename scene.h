@@ -11,6 +11,8 @@
 #include "pbr_mesh.h"
 #include "simple_mesh.h"
 #include "simple_material.h"
+#include "skybox.h"
+#include "node.h"
 
 typedef struct {
     vec3 position;
@@ -26,7 +28,7 @@ typedef struct {
     Camera camera;
     Light light;
 
-    IBL ibl;
+    Skybox skybox;
 
     Texture** textures;
     ShaderProgram** shaders;
@@ -34,6 +36,9 @@ typedef struct {
     SimpleMesh** simpleMeshes;
     PbrMaterial** pbrMaterials;
     PbrMesh** pbrMeshes;
+    Node** nodes;
+
+    TextureCacheEntry* textureCache;
 } Scene;
 
 extern Scene scene;

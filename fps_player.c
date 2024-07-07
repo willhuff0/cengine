@@ -25,7 +25,7 @@ static float jumpVelocity;
 
 void setupFpsPlayer() {
     glfwSetInputMode(engine.window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    glfwSetInputMode(engine.window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+    if (glfwRawMouseMotionSupported()) glfwSetInputMode(engine.window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
     glm_vec3_copy(scene.camera.position, position);
     jumpVelocity = sqrtf(2.0f * FPS_PLAYER_GRAVITY * FPS_PLAYER_JUMP_HEIGHT);
 }

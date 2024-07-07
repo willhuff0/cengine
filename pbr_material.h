@@ -8,16 +8,20 @@
 #include "shader.h"
 #include "texture.h"
 
-extern Texture* lightmapTexture;
+extern Texture* lightmap;
 
 typedef struct {
     ShaderProgram* shader;
 
-    Texture* albedo;
-    Texture* normal;
-    Texture* roughness;
-    Texture* metallic;
-    Texture* ao;
+    vec4 albedo;
+    float roughness;
+    float metallic;
+
+    Texture* albedoTex;
+    Texture* normalTex;
+    Texture* roughnessTex;
+    Texture* metallicTex;
+    Texture* aoTex;
 } PbrMaterial;
 
 PbrMaterial* createPbrMaterial(ShaderProgram* shader);
