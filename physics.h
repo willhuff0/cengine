@@ -10,21 +10,27 @@
 #include <ode/ode.h>
 
 #include "node.h"
+#include "components/trans_comp.h"
 
 typedef enum {
-    INIT_SCENE,
-    ADD_NODE,
-    REMOVE_NODE,
+    PHY_INIT_SCENE,
+    PHY_ADD_BODY,
+    PHY_REMOVE_BODY,
 } PhysicsOp;
 
-extern pthread_mutex_t physicsMutex;
-extern vec3 ballPos;
+typedef union {
+    PhysicsOp op;
+    void* obj;
+} PhysicsQueueEntry;
 
 void initPhysics();
 void freePhysics();
 
+void physicsQueueStart();
+void physicsQueueSubmit();
+
 void physicsInitScene();
-void physicsAddNode(Node* node);
-void physicsRemoveNode(dBodyID body);
+void physicsAddBody(PhysicsTransComp* comp);
+void physicsRemoveBody(dBodyID body);
 
 #endif //PHYSICS_H

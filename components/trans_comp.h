@@ -6,7 +6,6 @@
 #define TRANS_COMP_H
 
 #include <pthread.h>
-#include <ode/ode.h>
 
 #include "../common.h"
 #include "../node.h"

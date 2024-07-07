@@ -1,3 +1,4 @@
+#include "common.h"
 #include "engine.h"
 #include "model.h"
 #include "scene.h"
@@ -48,8 +49,8 @@ int main(int argc, const char* argv[])
     //
     Node* node = createNode();
 
-    TransComp* transComp = addTransComp(node);
-    transComp->pos[2] = 10.0f;
+    PhysicsTransComp* transComp = addPhysicsTransComp(node);
+    transComp->trans.pos[1] = 100.0f;
 
     DebugDrawComp* debugDraw = addDebugDrawComp(node);
     debugDraw->type = DEBUG_SPHERE;

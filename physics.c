@@ -6,106 +6,68 @@
 
 #include <ode/ode.h>
 
-//#define DEBUG_PHYSICS
+#include "physics_thread.h"
+#include "components/trans_comp.h"
 
-#define MAX_TICKS_PER_TIMESTEP 4
-#define PHYSICS_TIMESTEP (1.0f / 30.0f)
-
-pthread_mutex_t physicsMutex;
-vec3 ballPos = {0.0f, 50.0f, 0.0f};
+static PhysicsQueueEntry* opStack;
 
 static pthread_t thread;
-static bool shutdown;
 
-static dWorldID world;
-static dBodyID ball;
-
-static void physicsInit() {
-    dInitODE();
-    world = dWorldCreate();
-    dWorldSetGravity(world, 0.0f, -9.8f, 0.0f);
-
-    dMass mass;
-    dMassSetZero(&mass);
-    dMassSetSphereTotal(&mass, 1.0f, 0.5f);
-
-    ball = dBodyCreate(world);
-    dBodySetMass(ball, &mass);
-    dBodySetPosition(ball, 0.0f, 50.0f, 0.0f);
+static void initThreadQueue() {
+    pthread_mutex_init(&physicsQueue.mutex, NULL);
+    physicsQueue.ops = NULL;
 }
 
-static void physicsFree() {
-    dWorldDestroy(world);
-    dCloseODE();
-}
-
-static void physicsTick() {
-    dWorldQuickStep(world, PHYSICS_TIMESTEP);
-
-    const dReal* pos = dBodyGetPosition(ball);
-
-    pthread_mutex_lock(&physicsMutex);
-    ballPos[0] = pos[0];
-    ballPos[1] = pos[1];
-    ballPos[2] = pos[2];
-    pthread_mutex_unlock(&physicsMutex);
-}
-
-static void sleepForSeconds(double seconds) {
-    struct timespec req;
-    req.tv_sec = (time_t)seconds;
-    req.tv_nsec = (long)((seconds - req.tv_sec) * 1e9);
-
-    nanosleep(&req, NULL);
-}
-
-static double startTime;
-static double getTime() {
-    return glfwGetTime() - startTime;
-}
-
-static void* physicsThread(void* _) {
-    physicsInit();
-
-    startTime = glfwGetTime();
-    unsigned int tickIndex = 0;
-    for(;;) {
-        int i = 0;
-        while (PHYSICS_TIMESTEP * tickIndex < getTime()) {
-            physicsTick();
-            tickIndex++;
-            i++;
-            if (i >= 4) {
-                int skip = ceil((getTime() - PHYSICS_TIMESTEP * tickIndex) / PHYSICS_TIMESTEP);
-                tickIndex += skip;
-                printf("[PHYSICS] Running behind!, skipping %d tick(s).\n", skip);
-                break;
-            }
-
-            if (shutdown) {
-                physicsFree();
-                return NULL;
-            }
-        }
-
-        double wait = PHYSICS_TIMESTEP * tickIndex - getTime();
-#ifdef DEBUG_PHYSICS
-        printf("TICK %d: tt=%f, ct=%f, executed %d time(s), waiting %f seconds\n", tickIndex, PHYSICS_TIMESTEP * tickIndex, getTime(), i, wait);
-#endif
-        sleepForSeconds(wait);
-
-        if (shutdown) {
-            physicsFree();
-            return NULL;
-        }
-    }
+static void freeThreadQueue() {
+    pthread_mutex_destroy(&physicsQueue.mutex);
+    arrfree(physicsQueue.ops);
 }
 
 void initPhysics() {
-    pthread_create(&thread, NULL, physicsThread, NULL);
+    opStack = NULL;
+    initThreadQueue();
+    pthread_create(&thread, NULL, physicsThreadEntry, NULL);
 }
 
 void freePhysics() {
-    shutdown = true;
+    physicsThreadActivateShutdownFlag();
     pthread_join(thread, NULL);
+    if (opStack != NULL) arrfree(opStack);
+    freeThreadQueue();
+}
+
+void physicsQueueStart() {
+    if (opStack != NULL) {
+        arrfree(opStack);
+        opStack = NULL;
+    }
+}
+void physicsQueueSubmit() {
+    int count = arrlen(opStack);
+    if (count == 0) return;
+
+    pthread_mutex_lock(&physicsQueue.mutex);
+    PhysicsQueueEntry* threadOpStack = arraddnptr(physicsQueue.ops, count);
+    memcpy(threadOpStack, opStack, count * sizeof(PhysicsQueueEntry));
+    pthread_mutex_unlock(&physicsQueue.mutex);
+}
+
+static void pushOp(PhysicsOp op) {
+    arrput(opStack, (PhysicsQueueEntry){.op = op});
+}
+static void pushOpAndObj(PhysicsOp op, void* obj) {
+    arrput(opStack, (PhysicsQueueEntry){.op = op});
+    arrput(opStack, (PhysicsQueueEntry){.obj = obj});
+}
+
+void physicsInitScene() {
+    pushOp(PHY_INIT_SCENE);
+}
+
+void physicsAddBody(PhysicsTransComp* comp) {
+    pushOpAndObj(PHY_ADD_BODY, comp);
+}
+
+void physicsRemoveBody(dBodyID body) {
+    pushOpAndObj(PHY_REMOVE_BODY, body);
 }

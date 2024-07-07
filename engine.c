@@ -103,6 +103,8 @@ void initEngine() {
     initSkybox();
     initPhysics();
 
+    physicsQueueStart();
+
     printEngineInfo();
 }
 
@@ -140,6 +142,8 @@ static void renderFrame() {
 }
 
 void engineLoop() {
+    physicsQueueSubmit();
+
     initDebug();
 
     setupFlyCamera();
@@ -163,7 +167,9 @@ void engineLoop() {
         glm_vec4(scene.light.dir, 0.0f, frameArgs.pbr.lightDir);
         glm_vec4(scene.light.intensity, 0.0f, frameArgs.pbr.lightIntensity);
 
+        physicsQueueStart();
         tick();
+        physicsQueueSubmit();
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

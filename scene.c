@@ -4,6 +4,8 @@
 
 #include "scene.h"
 
+#include "physics.h"
+
 Scene scene;
 bool sceneIsLoaded = false;
 
@@ -24,6 +26,8 @@ static void initScene() {
     scene.nodes = NULL;
 
     scene.textureCache = NULL;
+
+    physicsInitScene();
 }
 
 // typedef enum {

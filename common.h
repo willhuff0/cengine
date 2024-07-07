@@ -7,6 +7,9 @@
 
 #include <stdbool.h>
 
+#define dSINGLE
+#include <ode/ode.h>
+
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <GLES3/gl32.h>

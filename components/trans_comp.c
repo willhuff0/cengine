@@ -7,6 +7,7 @@
 #include "../component.h"
 #include "../draw_queue.h"
 #include "../engine.h"
+#include "../physics.h"
 
 static void initTrans(TransComp* trans) {
     glm_vec3_zero(trans->pos);
@@ -26,8 +27,8 @@ PhysicsTransComp* addPhysicsTransComp(Node* node) {
     PhysicsTransComp* physicsTrans = malloc(sizeof(PhysicsTransComp));
     pthread_mutex_init(&physicsTrans->mutex, NULL);
     physicsTrans->body = NULL;
-    // QUEUE PHYSICS ADD BODY
     initTrans(&physicsTrans->trans);
+    physicsAddBody(physicsTrans);
 
     ADD_COMP(node, COMP_PHYSICS_TRANS, physicsTrans, physicsTrans)
     return physicsTrans;
@@ -38,8 +39,9 @@ void freeTransComp(TransComp* comp) {
 }
 
 void freePhysicsTransComp(PhysicsTransComp* comp) {
+    pthread_mutex_lock(&comp->mutex);
     pthread_mutex_destroy(&comp->mutex);
-    // QUEUE PHYSICS REMOVE BODY
+    physicsRemoveBody(comp->body);
     free(comp);
 }
 

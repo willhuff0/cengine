@@ -37,6 +37,8 @@ add_executable(cengine main.c
         components/debug_draw_comp.h
         fps_counter.c
         fps_counter.h
+        physics_thread.c
+        physics_thread.h
 )
 
 target_include_directories(cengine PRIVATE ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/include/angle)
