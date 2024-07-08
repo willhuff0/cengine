@@ -256,3 +256,14 @@ bool loadPbrModel(PbrModel* outModel, ShaderProgram* shader, const char* dir, co
 void freePbrModel(PbrModel* model) {
     free(model->meshes);
 }
+
+PbrModel testModel;
+
+void drawPbrModel(PbrModel* model, mat4 modelMat) {
+    for (int i = 0; i < model->numMeshes; ++i) {
+        PbrMesh* mesh = model->meshes[i];
+        bindPbrMesh(mesh);
+        setUniformMat4(mesh->material->shader, "u_modelMat", modelMat);
+        drawPbrMesh(mesh);
+    }
+}

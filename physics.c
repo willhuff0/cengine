@@ -4,70 +4,46 @@
 
 #include "physics.h"
 
-#include <ode/ode.h>
-
-#include "physics_thread.h"
-#include "components/trans_comp.h"
-
-static PhysicsQueueEntry* opStack;
-
-static pthread_t thread;
-
-static void initThreadQueue() {
-    pthread_mutex_init(&physicsQueue.mutex, NULL);
-    physicsQueue.ops = NULL;
-}
-
-static void freeThreadQueue() {
-    pthread_mutex_destroy(&physicsQueue.mutex);
-    arrfree(physicsQueue.ops);
-}
+static dWorldID world;
 
 void initPhysics() {
-    opStack = NULL;
-    initThreadQueue();
-    pthread_create(&thread, NULL, physicsThreadEntry, NULL);
+    dInitODE();
+    world = NULL;
 }
-
 void freePhysics() {
-    physicsThreadActivateShutdownFlag();
-    pthread_join(thread, NULL);
-    if (opStack != NULL) arrfree(opStack);
-    freeThreadQueue();
-}
-
-void physicsQueueStart() {
-    if (opStack != NULL) {
-        arrfree(opStack);
-        opStack = NULL;
+    if (world != NULL) {
+        dWorldDestroy(world);
     }
-}
-void physicsQueueSubmit() {
-    int count = arrlen(opStack);
-    if (count == 0) return;
-
-    pthread_mutex_lock(&physicsQueue.mutex);
-    PhysicsQueueEntry* threadOpStack = arraddnptr(physicsQueue.ops, count);
-    memcpy(threadOpStack, opStack, count * sizeof(PhysicsQueueEntry));
-    pthread_mutex_unlock(&physicsQueue.mutex);
+    dCloseODE();
 }
 
-static void pushOp(PhysicsOp op) {
-    arrput(opStack, (PhysicsQueueEntry){.op = op});
-}
-static void pushOpAndObj(PhysicsOp op, void* obj) {
-    arrput(opStack, (PhysicsQueueEntry){.op = op});
-    arrput(opStack, (PhysicsQueueEntry){.obj = obj});
-}
-
-void physicsInitScene() {
-    pushOp(PHY_INIT_SCENE);
+static void copyOdeQuatToVersor(const dQuaternion from, versor dest) {
+    dest[0] = from[1];
+    dest[1] = from[2];
+    dest[2] = from[3];
+    dest[3] = from[0];
 }
 
-void physicsAddBody(PhysicsTransComp* comp) {
-    pushOpAndObj(PHY_ADD_BODY, comp);
+void physicsCreateWorld() {
+    if (world != NULL) {
+        dWorldDestroy(world);
+    }
+    world = dWorldCreate();
+    dWorldSetGravity(world, 0.0f, PHYSICS_GRAVITY, 0.0f);
+}
+
+dBodyID physicsCreateSphere(vec3 pos, float radius, float mass) {
+    dMass d_mass;
+    dMassSetZero(&d_mass);
+    dMassSetSphereTotal(&d_mass, mass, radius);
+
+    dBodyID body = dBodyCreate(world);
+    dBodySetMass(body, &d_mass);
+    dBodySetPosition(body, pos[0], pos[1], pos[2]);
+
+    return body;
 }
 
 void physicsRemoveBody(dBodyID body) {
-    pushOpAndObj(PHY_REMOVE_BODY, body);
+    dBodyDestroy(body);
 }

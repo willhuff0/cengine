@@ -2,8 +2,6 @@
 #include "engine.h"
 #include "model.h"
 #include "scene.h"
-#include "components/debug_draw_comp.h"
-#include "components/mesh_comp.h"
 
 int main(int argc, const char* argv[])
 {
@@ -33,32 +31,11 @@ int main(int argc, const char* argv[])
     ShaderProgram* sp;
     createShaderProgram(&sp, DEFAULT_SHADER_PBR);
 
-    PbrModel model;
-    loadPbrModel(&model, sp, "/Users/will/CLionProjects/cengine/test/lightmap", "/Users/will/CLionProjects/cengine/test/lightmap/untitled.glb");
-
-    for (int i = 0; i < model.numMeshes; ++i) {
-        Node* node = createNode();
-
-        TransComp* transComp = addTransComp(node);
-
-        MeshComp* meshComp = addMeshComp(node);
-        meshComp->meshType = MESH_PBR;
-        meshComp->mesh.pbrMesh = model.meshes[i];
-    }
-
-    //
-    Node* node = createNode();
-
-    PhysicsTransComp* transComp = addPhysicsTransComp(node);
-    transComp->trans.pos[1] = 100.0f;
-
-    DebugDrawComp* debugDraw = addDebugDrawComp(node);
-    debugDraw->type = DEBUG_SPHERE;
-    //
-
-    freePbrModel(&model);
+    loadPbrModel(&testModel, sp, "/Users/will/CLionProjects/cengine/test/lightmap", "/Users/will/CLionProjects/cengine/test/lightmap/untitled.glb");
 
     engineLoop();
+
+    freePbrModel(&testModel);
 
     unloadScene();
 

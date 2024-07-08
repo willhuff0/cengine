@@ -7,7 +7,6 @@
 
 #include "pbr_mesh.h"
 #include "simple_mesh.h"
-#include "components/trans_comp.h"
 
 #define DRAW_OP(iType, iObj, iOp) drawQueueAddOp(&frameArgs.queue, (DrawOp){.type = (iType), .obj.iObj = (iOp)})
 

@@ -34,4 +34,8 @@ void freeSimpleModel(SimpleModel* model);
 bool loadPbrModel(PbrModel* outModel, ShaderProgram* shader, const char* dir, const char* path);
 void freePbrModel(PbrModel* model);
 
+extern PbrModel testModel;
+
+void drawPbrModel(PbrModel* model);
+
 #endif //MODEL_H

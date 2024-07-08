@@ -9,9 +9,12 @@
 #include "debug.h"
 #include "fly_camera.h"
 #include "fps_counter.h"
+#include "game.h"
 #include "ibl.h"
+#include "model.h"
 #include "physics.h"
 #include "scene.h"
+#include "visual_presenter.h"
 
 #define DEFAULT_WINDOW_WIDTH  1440/1.25
 #define DEFAULT_WINDOW_HEIGHT 900/1.25
@@ -103,7 +106,8 @@ void initEngine() {
     initSkybox();
     initPhysics();
 
-    physicsQueueStart();
+    initVisualStates();
+    initPresenter();
 
     printEngineInfo();
 }
@@ -120,30 +124,26 @@ static void makeViewProjMat(mat4 viewProjMat) {
     glm_mat4_mul(proj, view, viewProjMat);
 }
 
-static void tick() {
-    tickFlyCamera(frameArgs.deltaTime);
-
-    for (int i = 0; i < arrlen(scene.nodes); ++i) {
-        tickNode(scene.nodes[i]);
-    }
-}
-
 static void renderFrame() {
-    initDrawQueue(&frameArgs.queue);
+    // initDrawQueue(&frameArgs.queue);
+    //
+    // // Draw
+    //
+    // executeDrawQueue(&frameArgs.queue);
+    // freeDrawQueue(&frameArgs.queue);
 
-    for (int i = 0; i < arrlen(scene.nodes); ++i) {
-        drawNode(scene.nodes[i]);
-    }
-    executeDrawQueue(&frameArgs.queue);
-    freeDrawQueue(&frameArgs.queue);
+    drawPbrModel(&testModel);
+
+    const VisualState* previous = getPreviousVisualState();
+    const VisualState* current = getCurrentVisualState();
+    const float t = (glfwGetTime() - current->timestamp) / GAME_TIMESTEP;
+    present(previous, current, t);
 
     debugRenderFrame();
     skyboxRenderFrame();
 }
 
 void engineLoop() {
-    physicsQueueSubmit();
-
     initDebug();
 
     setupFlyCamera();
@@ -167,10 +167,6 @@ void engineLoop() {
         glm_vec4(scene.light.dir, 0.0f, frameArgs.pbr.lightDir);
         glm_vec4(scene.light.intensity, 0.0f, frameArgs.pbr.lightIntensity);
 
-        physicsQueueStart();
-        tick();
-        physicsQueueSubmit();
-
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glBindBuffer(GL_UNIFORM_BUFFER, engine.cengineUbo);
@@ -178,14 +174,6 @@ void engineLoop() {
 
         glBindBuffer(GL_UNIFORM_BUFFER, engine.cenginePbrUbo);
         glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(CEnginePbr), &frameArgs.pbr);
-
-        // debugDrawPoint((vec3){0.0f, 0.0f, 0.0f}, 3.0f, (vec4){0.0f, 1.0f, 0.0f, 1.0f});
-        // debugDrawPoint((vec3){0.0f, 3.0f, 0.0f}, 3.0f, (vec4){1.0f, 0.0f, 0.0f, 0.5f});
-        // debugDrawPoint((vec3){3.0f, 0.0f, 0.0f}, 3.0f, (vec4){1.0f, 0.0f, 0.0f, 1.0f});
-        // debugDrawPoint((vec3){0.0f, 0.0f, 3.0f}, 3.0f, (vec4){1.0f, 0.0f, 0.0f, 1.0f});
-
-        //debugDrawVolume((vec3){10.0, 10.0, -15.0}, (vec3){20.0f, 10.0f, 15.0f}, (vec4){1.0, 0.5f, 0.5f, 0.5f});
-        //debugDrawSphere((vec3){10.0, -10.0, -20.0}, 5.0f, (vec4){1.0, 0.5f, 1.0f, 0.25f});
 
         renderFrame();
 
@@ -196,6 +184,9 @@ void engineLoop() {
 }
 
 void freeEngine() {
+    freePresenter();
+    freeVisualStates();
+
     freeSkybox();
     freePhysics();
 

@@ -24,13 +24,6 @@ static dWorldID world;
 
 static PhysicsTransComp** bodies;
 
-static void copyOdeQuatToVersor(const dQuaternion from, versor dest) {
-    dest[0] = from[1];
-    dest[1] = from[2];
-    dest[2] = from[3];
-    dest[3] = from[0];
-}
-
 static void physicsInit() {
     dInitODE();
     shutdown = false;

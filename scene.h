@@ -36,7 +36,6 @@ typedef struct {
     SimpleMesh** simpleMeshes;
     PbrMaterial** pbrMaterials;
     PbrMesh** pbrMeshes;
-    Node** nodes;
 
     TextureCacheEntry* textureCache;
 } Scene;
