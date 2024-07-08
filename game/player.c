@@ -8,13 +8,14 @@
 #include "../game.h"
 #include "../input.h"
 #include "../physics.h"
-#include "../scene.h"
+#include "../visual_state.h"
 
+#define PLAYER_CAMERA_HEIGHT 2.0f
 #define PLAYER_JUMP_HEIGHT 1.5f
-#define PLAYER_JUMP_VELOCITY sqrtf(2.0f * PHYSICS_GRAVITY * PLAYER_JUMP_HEIGHT)
+#define PLAYER_JUMP_VELOCITY sqrtf(-2.0f * PHYSICS_GRAVITY * PLAYER_JUMP_HEIGHT)
 #define PLAYER_WALK_MOVE_SPEED 3.0f
 #define PLAYER_RUN_MOVE_SPEED 6.0f
-#define PLAYER_LOOK_SENSITIVITY 5.0f
+#define PLAYER_LOOK_SENSITIVITY 0.1f
 
 void createLocalPlayer(LocalPlayer* lPlayer, int id) {
     lPlayer->id = id;
@@ -44,17 +45,13 @@ void syncRemotePlayer(RemotePlayer* rPlayer, StcSyncPlayerPacket packet) {
 }
 
 void tickLocalPlayer(LocalPlayer* lPlayer) {
-    lPlayer->lookX = glm_clamp(lPlayer->lookX - inputGetMouseDeltaY() * PLAYER_LOOK_SENSITIVITY * tickArgs.deltaTime, -89.99f, 89.99f);
-    lPlayer->lookY += inputGetMouseDeltaX() * PLAYER_LOOK_SENSITIVITY * tickArgs.deltaTime;
-
-    scene.camera.forward[0] = cosf(glm_rad(lPlayer->lookY)) * cosf(glm_rad(lPlayer->lookX));
-    scene.camera.forward[1] = sinf(glm_rad(lPlayer->lookX));
-    scene.camera.forward[2] = sinf(glm_rad(lPlayer->lookY)) * cosf(glm_rad(lPlayer->lookX));
-    glm_normalize(scene.camera.forward);
+    lPlayer->lookX = glm_clamp(lPlayer->lookX - inputGetMouseDeltaY() * PLAYER_LOOK_SENSITIVITY, -89.99f, 89.99f);
+    lPlayer->lookY += inputGetMouseDeltaX() * PLAYER_LOOK_SENSITIVITY;
 
     vec3 playerForward;
-    glm_vec3_copy(scene.camera.forward, playerForward);
+    playerForward[0] = cosf(glm_rad(lPlayer->lookY)) * cosf(glm_rad(lPlayer->lookX));
     playerForward[1] = 0.0f;
+    playerForward[2] = sinf(glm_rad(lPlayer->lookY)) * cosf(glm_rad(lPlayer->lookX));
     glm_normalize(playerForward);
 
     vec3 playerRight;
@@ -70,9 +67,9 @@ void tickLocalPlayer(LocalPlayer* lPlayer) {
 
     float speed = inputGetKeyHeld(GLFW_KEY_LEFT_SHIFT) ? PLAYER_WALK_MOVE_SPEED : PLAYER_RUN_MOVE_SPEED;
 
-    move[0] *= speed * frameArgs.deltaTime;
-    move[1] *= speed * frameArgs.deltaTime;
-    move[2] *= speed * frameArgs.deltaTime;
+    move[0] *= speed * tickArgs.deltaTime;
+    move[1] *= speed * tickArgs.deltaTime;
+    move[2] *= speed * tickArgs.deltaTime;
 
     glm_vec3_add(lPlayer->position, move, lPlayer->position);
 
@@ -89,21 +86,28 @@ void tickLocalPlayer(LocalPlayer* lPlayer) {
      } else {
          // In air
 
-         lPlayer->yVelocity -= PHYSICS_GRAVITY * tickArgs.deltaTime;
+         lPlayer->yVelocity += PHYSICS_GRAVITY * tickArgs.deltaTime;
      }
     lPlayer->position[1] += lPlayer->yVelocity * tickArgs.deltaTime;
 
-    glm_vec3_copy(lPlayer->position, scene.camera.position);
+    //printf("POS: (%f, %f, %f), YVEL: %f\n", lPlayer->position[0], lPlayer->position[1], lPlayer->position[2], lPlayer->yVelocity);
 }
 void tickRemotePlayer(RemotePlayer* rPlayer) { }
 
 // Visual
 
-void visualizeLocalPlayer(LocalPlayer* lPlayer, VPlayer* vPlayer) {
+void visualizeLocalPlayer(LocalPlayer* lPlayer, VPlayer* vPlayer, VCamera* vCamera) {
     glm_vec3_copy(lPlayer->position, vPlayer->position);
 
     vPlayer->lookX = lPlayer->lookX;
     vPlayer->lookY = lPlayer->lookY;
+
+    glm_vec3_add(lPlayer->position, (vec3){0.0f, PLAYER_CAMERA_HEIGHT, 0.0f}, vCamera->position);
+
+    vCamera->forward[0] = cosf(glm_rad(lPlayer->lookY)) * cosf(glm_rad(lPlayer->lookX));
+    vCamera->forward[1] = sinf(glm_rad(lPlayer->lookX));
+    vCamera->forward[2] = sinf(glm_rad(lPlayer->lookY)) * cosf(glm_rad(lPlayer->lookX));
+    glm_normalize(vCamera->forward);
 }
 void visualizeRemotePlayer(RemotePlayer* rPlayer, VPlayer* vPlayer) {
     glm_vec3_copy(rPlayer->position, vPlayer->position);

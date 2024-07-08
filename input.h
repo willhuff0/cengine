@@ -10,6 +10,9 @@
 void initInput();
 void freeInput();
 
+void lockInputStates();
+void unlockInputStates();
+
 void inputSwapStates();
 
 float inputGetMouseDeltaX();

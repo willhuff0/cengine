@@ -36,6 +36,13 @@ void freeVisualStates() {
     pthread_mutex_destroy(&mutex);
 }
 
+void lockVisualStates() {
+    pthread_mutex_lock(&mutex);
+}
+void unlockVisualStates() {
+    pthread_mutex_unlock(&mutex);
+}
+
 void swapVisualStates() {
     pthread_mutex_lock(&mutex);
 

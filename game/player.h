@@ -8,6 +8,8 @@
 #include "../common.h"
 #include "../packets.h"
 
+typedef struct VCamera VCamera;
+
 typedef struct {
     int id;
 
@@ -47,7 +49,7 @@ typedef struct {
     float lookY;
 } VPlayer;
 
-void visualizeLocalPlayer(LocalPlayer* lPlayer, VPlayer* vPlayer);
+void visualizeLocalPlayer(LocalPlayer* lPlayer, VPlayer* vPlayer, VCamera* vCamera);
 void visualizeRemotePlayer(RemotePlayer* rPlayer, VPlayer* vPlayer);
 
 //

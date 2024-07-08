@@ -7,14 +7,23 @@
 
 #include "game/player.h"
 
+struct VCamera {
+    vec3 position;
+    vec3 forward;
+};
+
 typedef struct {
     double timestamp;
 
-    VPlayer player;
+    VCamera camera;
+    VPlayer localPlayer;
 } VisualState;
 
 void initVisualStates();
 void freeVisualStates();
+
+void lockVisualStates();
+void unlockVisualStates();
 
 void swapVisualStates();
 

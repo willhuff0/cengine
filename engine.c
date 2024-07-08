@@ -7,10 +7,11 @@
 #include <stdio.h>
 
 #include "debug.h"
-#include "fly_camera.h"
 #include "fps_counter.h"
 #include "game.h"
+#include "game_thread.h"
 #include "ibl.h"
+#include "input.h"
 #include "model.h"
 #include "physics.h"
 #include "scene.h"
@@ -105,6 +106,7 @@ void initEngine() {
 
     initSkybox();
     initPhysics();
+    initDebug();
 
     initVisualStates();
     initPresenter();
@@ -112,46 +114,67 @@ void initEngine() {
     printEngineInfo();
 }
 
-static void makeViewProjMat(mat4 viewProjMat) {
+static void makeViewProjMat(vec3 cameraPosition, vec3 cameraForward, mat4 viewProjMat) {
     mat4 proj;
     glm_perspective(glm_rad(70.0f), (float)engine.windowWidth / (float)engine.windowHeight, 0.1f, 300.0, proj);
 
-    mat4 lookTarget;
-    glm_vec3_add(scene.camera.position, scene.camera.forward, lookTarget);
+    vec3 lookTarget;
+    glm_vec3_add(cameraPosition, cameraForward, lookTarget);
     mat4 view;
-    glm_lookat(scene.camera.position, lookTarget, (vec3){0.0f, 1.0f, 0.0f}, view);
+    glm_lookat(cameraPosition, lookTarget, (vec3){0.0f, 1.0f, 0.0f}, view);
 
     glm_mat4_mul(proj, view, viewProjMat);
 }
 
-static void renderFrame() {
-    // initDrawQueue(&frameArgs.queue);
-    //
-    // // Draw
-    //
-    // executeDrawQueue(&frameArgs.queue);
-    // freeDrawQueue(&frameArgs.queue);
-
-    drawPbrModel(&testModel);
+static void renderFrame(double time, double deltaTime) {
+    lockVisualStates();
 
     const VisualState* previous = getPreviousVisualState();
     const VisualState* current = getCurrentVisualState();
     const float t = (glfwGetTime() - current->timestamp) / GAME_TIMESTEP;
+
+    vec3 cameraPosition;
+    glm_vec3_lerp(previous->camera.position, current->camera.position, t, cameraPosition);
+
+    vec3 cameraForward;
+    glm_vec3_lerpc(previous->camera.forward, current->camera.forward, t, cameraForward);
+    glm_normalize(cameraForward);
+
+    frameArgs = (FrameArgs) {time, deltaTime};
+    makeViewProjMat(cameraPosition, cameraForward, frameArgs.viewProjMat);
+    glm_vec4(cameraPosition, 0.0f, frameArgs.pbr.viewPos);
+    glm_vec4(scene.light.dir, 0.0f, frameArgs.pbr.lightDir);
+    glm_vec4(scene.light.intensity, 0.0f, frameArgs.pbr.lightIntensity);
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glBindBuffer(GL_UNIFORM_BUFFER, engine.cengineUbo);
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(mat4), frameArgs.viewProjMat);
+
+    glBindBuffer(GL_UNIFORM_BUFFER, engine.cenginePbrUbo);
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(CEnginePbr), &frameArgs.pbr);
+
     present(previous, current, t);
+
+    unlockVisualStates();
+
+    mat4 modelMat;
+    glm_mat4_identity(modelMat);
+    drawPbrModel(&testModel, modelMat);
 
     debugRenderFrame();
     skyboxRenderFrame();
 }
 
 void engineLoop() {
-    initDebug();
-
-    setupFlyCamera();
+    initGameThread();
 
     double lastTime = glfwGetTime();
     startFpsCounter();
     while(!glfwWindowShouldClose(engine.window)) {
+        lockInputStates();
         glfwPollEvents();
+        unlockInputStates();
 
         if (glfwGetKey(engine.window, GLFW_KEY_ESCAPE) == GLFW_PRESS) glfwSetWindowShouldClose(engine.window, GLFW_TRUE);
         if (glfwGetKey(engine.window, GLFW_KEY_P) == GLFW_PRESS) glfwSetInputMode(engine.window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
@@ -161,26 +184,12 @@ void engineLoop() {
         lastTime = time;
         tickFpsCounter();
 
-        frameArgs = (FrameArgs) {time, deltaTime};
-        makeViewProjMat(frameArgs.viewProjMat);
-        glm_vec4(scene.camera.position, 0.0f, frameArgs.pbr.viewPos);
-        glm_vec4(scene.light.dir, 0.0f, frameArgs.pbr.lightDir);
-        glm_vec4(scene.light.intensity, 0.0f, frameArgs.pbr.lightIntensity);
-
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        glBindBuffer(GL_UNIFORM_BUFFER, engine.cengineUbo);
-        glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(mat4), frameArgs.viewProjMat);
-
-        glBindBuffer(GL_UNIFORM_BUFFER, engine.cenginePbrUbo);
-        glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(CEnginePbr), &frameArgs.pbr);
-
-        renderFrame();
+        renderFrame(time, deltaTime);
 
         glfwSwapBuffers(engine.window);
     }
 
-    freeDebug();
+    freeGameThread();
 }
 
 void freeEngine() {
@@ -189,6 +198,7 @@ void freeEngine() {
 
     freeSkybox();
     freePhysics();
+    freeDebug();
 
     glDeleteBuffers(1, &engine.cengineUbo);
     glDeleteBuffers(1, &engine.cenginePbrUbo);

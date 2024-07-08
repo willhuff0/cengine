@@ -36,6 +36,6 @@ void freePbrModel(PbrModel* model);
 
 extern PbrModel testModel;
 
-void drawPbrModel(PbrModel* model);
+void drawPbrModel(PbrModel* model, mat4 modelMat);
 
 #endif //MODEL_H

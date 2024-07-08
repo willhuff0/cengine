@@ -12,12 +12,6 @@
 #include "simple_mesh.h"
 #include "simple_material.h"
 #include "skybox.h"
-#include "node.h"
-
-typedef struct {
-    vec3 position;
-    vec3 forward;
-} Camera;
 
 typedef struct {
     vec3 dir;
@@ -25,7 +19,6 @@ typedef struct {
 } Light;
 
 typedef struct {
-    Camera camera;
     Light light;
 
     Skybox skybox;

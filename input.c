@@ -82,6 +82,12 @@ void freeInput() {
     pthread_mutex_destroy(&mutex);
 }
 
+void lockInputStates() {
+    pthread_mutex_lock(&mutex);
+}
+void unlockInputStates() {
+    pthread_mutex_unlock(&mutex);
+}
 
 void inputSwapStates() {
     pthread_mutex_lock(&mutex);

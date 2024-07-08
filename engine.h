@@ -6,7 +6,6 @@
 #define ENGINE_H
 
 #include "common.h"
-#include "draw_queue.h"
 
 typedef struct {
     vec4 viewPos;
@@ -27,7 +26,6 @@ typedef struct {
     float deltaTime;
     mat4 viewProjMat;
     CEnginePbr pbr;
-    DrawQueue queue;
 } FrameArgs;
 
 extern Engine engine;

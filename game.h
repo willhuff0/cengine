@@ -7,7 +7,7 @@
 
 //#define DEBUG_TIMESTEP
 #define MAX_TICKS_PER_TIMESTEP 4
-#define GAME_TIMESTEP (1.0f / 2.0f)
+#define GAME_TIMESTEP (1.0f / 60.0f)
 
 typedef struct {
     float deltaTime;

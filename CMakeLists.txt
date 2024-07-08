@@ -19,8 +19,6 @@ add_executable(cengine main.c
         texture.c
         model.c
         stbi_impl.c
-        fly_camera.c
-        fps_player.c
         bounds.c
         debug.c
         simple_material.c
@@ -28,11 +26,8 @@ add_executable(cengine main.c
         ibl.c
         skybox.c
         physics.c
-        draw_queue.c
         fps_counter.c
         fps_counter.h
-        physics_thread.c
-        physics_thread.h
         visual_state.c
         visual_state.h
         game.c

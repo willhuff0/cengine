@@ -18,7 +18,7 @@ void tickGameState() {
 }
 
 void visualizeGameState(VisualState* dest) {
-    visualizeLocalPlayer(&state.localPlayer, &dest->player);
+    visualizeLocalPlayer(&state.localPlayer, &dest->localPlayer, &dest->camera);
 
     dest->timestamp = glfwGetTime();
 }

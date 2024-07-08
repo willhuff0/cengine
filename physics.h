@@ -7,7 +7,7 @@
 
 #include "common.h"
 
-#define PHYSICS_GRAVITY -9.8f
+#define PHYSICS_GRAVITY -9.8f * 1.5f
 
 void initPhysics();
 void freePhysics();
