@@ -3,10 +3,12 @@ project(cengine C)
 
 set(CMAKE_C_STANDARD 17)
 
-#set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g")
-#set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
-#
-#set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++ -static")
+if (WIN32)
+    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
+
+    set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++ -static")
+endif()
 
 add_executable(cengine main.c
         common.c
@@ -52,9 +54,9 @@ if(WIN32)
             ${PROJECT_SOURCE_DIR}/libs/win/libglfw3.a
             ${PROJECT_SOURCE_DIR}/libs/win/libGLESv2.lib
             ${PROJECT_SOURCE_DIR}/libs/win/libEGL.lib
-            ${PROJECT_SOURCE_DIR}/libs/win/assimp-vc143-mtd.lib
+            ${PROJECT_SOURCE_DIR}/libs/win/libassimp.dll.a
             ${PROJECT_SOURCE_DIR}/libs/win/libcglm.a
-            ${PROJECT_SOURCE_DIR}/libs/win/libode_singlesd.a
+            ${PROJECT_SOURCE_DIR}/libs/win/libode_single.dll.a
     )
 elseif(APPLE)
     target_link_libraries(cengine PRIVATE

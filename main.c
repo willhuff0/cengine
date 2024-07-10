@@ -14,7 +14,7 @@ int main(int argc, const char* argv[])
         exit(49);
     }
 
-    if (!createTextureFromPath(&lightmap, "/Users/will/CLionProjects/cengine/test/lightmap/Lightmap.tga")) {
+    if (!createTextureFromPath(&lightmap, ROOT_DIR "test" DIR "lightmap" DIR "Lightmap.tga")) {
         fprintf(stderr, "Failed to load skybox cubemap..\n");
         exit(50);
     }
@@ -31,7 +31,7 @@ int main(int argc, const char* argv[])
     ShaderProgram* sp;
     createShaderProgram(&sp, DEFAULT_SHADER_PBR);
 
-    loadPbrModel(&testModel, sp, "/Users/will/CLionProjects/cengine/test/lightmap", "/Users/will/CLionProjects/cengine/test/lightmap/untitled.glb");
+    loadPbrModel(&testModel, sp, ROOT_DIR "test" DIR "lightmap", ROOT_DIR "test" DIR "lightmap" DIR "untitled.glb");
 
     engineLoop();
 

@@ -17,8 +17,8 @@
 #include "scene.h"
 #include "visual_presenter.h"
 
-#define DEFAULT_WINDOW_WIDTH  1440/1.25
-#define DEFAULT_WINDOW_HEIGHT 900/1.25
+#define DEFAULT_WINDOW_WIDTH  1920/1.25
+#define DEFAULT_WINDOW_HEIGHT 1080/1.25
 
 Engine engine;
 FrameArgs frameArgs;

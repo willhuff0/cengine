@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <glfw/glfw3.h>
 
-//#define ENABLE_FPS_COUNTER
+#define ENABLE_FPS_COUNTER
 #define CAPTURE_DURATION 2.0
 
 static double captureStartTime;

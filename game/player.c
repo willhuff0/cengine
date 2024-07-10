@@ -15,7 +15,7 @@
 #define PLAYER_JUMP_VELOCITY sqrtf(-2.0f * PHYSICS_GRAVITY * PLAYER_JUMP_HEIGHT)
 #define PLAYER_WALK_MOVE_SPEED 3.0f
 #define PLAYER_RUN_MOVE_SPEED 6.0f
-#define PLAYER_LOOK_SENSITIVITY 0.1f
+#define PLAYER_LOOK_SENSITIVITY 0.05f
 
 void createLocalPlayer(LocalPlayer* lPlayer, int id) {
     lPlayer->id = id;

@@ -9,6 +9,11 @@
 #include <pthread.h>
 
 typedef struct {
+    double startCursorX;
+    double startCursorY;
+    double endCursorX;
+    double endCursorY;
+
     float cursorX;
     float cursorY;
 
@@ -23,8 +28,8 @@ static InputState* current;
 static InputState* next;
 
 static void cursorPosCallback(GLFWwindow* window, double xPos, double yPos) {
-    next->cursorX = xPos;
-    next->cursorY = yPos;
+    next->endCursorX = xPos;
+    next->endCursorY = yPos;
 }
 
 static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -44,6 +49,11 @@ static void keyCallback(GLFWwindow* window, int key, int scancode, int action, i
 }
 
 static void initInputState(InputState* state) {
+    state->startCursorX = 0.0;
+    state->startCursorY = 0.0;
+    state->endCursorX = 0.0;
+    state->endCursorY = 0.0;
+
     state->cursorX = 0.0f;
     state->cursorY = 0.0f;
 
@@ -92,14 +102,20 @@ void unlockInputStates() {
 void inputSwapStates() {
     pthread_mutex_lock(&mutex);
 
-    glfwSetCursorPos(engine.window, 0.0, 0.0);
-
     InputState* tempCurrent = current;
     current = next;
     next = tempCurrent;
 
+    current->cursorX = current->endCursorX - current->startCursorX;
+    current->cursorY = current->endCursorY - current->startCursorY;
+
     freeInputState(next);
     initInputState(next);
+
+    next->startCursorX = current->endCursorX;
+    next->startCursorY = current->endCursorY;
+    next->endCursorX = current->endCursorX;
+    next->endCursorY = current->endCursorY;
 
     for (int i = arrlen(current->keysHeld) - 1; i >= 0; --i) {
         int key = current->keysHeld[i];

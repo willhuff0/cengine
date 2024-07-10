@@ -19,8 +19,19 @@
 #include <stb_image.h>
 #include <stb_ds.h>
 
+#ifdef _WIN32
+
+#define DIR "\\"
+#define ROOT_DIR "C:\\Users\\wehuf\\CLionProjects\\cengine\\"
+
+#elif __APPLE__
+
 #define DIR "/"
-#define DEFAULT_DIR "/Users/will/CLionProjects/cengine/defaults/"
+#define ROOT_DIR "/Users/will/CLionProjects/cengine/"
+
+#endif
+
+#define DEFAULT_DIR ROOT_DIR "defaults" DIR
 
 char* readFile(const char* path);
 
