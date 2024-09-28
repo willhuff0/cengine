@@ -23,5 +23,5 @@ void bindSimpleMaterial(const SimpleMaterial* material) {
 }
 
 void deleteSimpleMaterial(SimpleMaterial* material) {
-
+    free(material);
 }

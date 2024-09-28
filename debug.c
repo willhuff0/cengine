@@ -137,9 +137,9 @@ static void renderVolumes() {
     glEnableVertexAttribArray(5);
     glEnableVertexAttribArray(6);
     glVertexAttribPointer(3, 4, GL_FLOAT, false, sizeof(SimpleDraw), (void*)offsetof(SimpleDraw, modelMat));
-    glVertexAttribPointer(4, 4, GL_FLOAT, false, sizeof(SimpleDraw), (void*)offsetof(SimpleDraw, modelMat) + sizeof(vec4));
-    glVertexAttribPointer(5, 4, GL_FLOAT, false, sizeof(SimpleDraw), (void*)offsetof(SimpleDraw, modelMat) + sizeof(vec4) * 2);
-    glVertexAttribPointer(6, 4, GL_FLOAT, false, sizeof(SimpleDraw), (void*)offsetof(SimpleDraw, modelMat) + sizeof(vec4) * 3);
+    glVertexAttribPointer(4, 4, GL_FLOAT, false, sizeof(SimpleDraw), (void*)(offsetof(SimpleDraw, modelMat) + sizeof(vec4)));
+    glVertexAttribPointer(5, 4, GL_FLOAT, false, sizeof(SimpleDraw), (void*)(offsetof(SimpleDraw, modelMat) + sizeof(vec4) * 2));
+    glVertexAttribPointer(6, 4, GL_FLOAT, false, sizeof(SimpleDraw), (void*)(offsetof(SimpleDraw, modelMat) + sizeof(vec4) * 3));
 
     // Make instanced arrays
     glVertexAttribDivisor(2, 1);
@@ -185,9 +185,9 @@ static void renderSpheres() {
     glEnableVertexAttribArray(5);
     glEnableVertexAttribArray(6);
     glVertexAttribPointer(3, 4, GL_FLOAT, false, sizeof(SimpleDraw), (void*)offsetof(SimpleDraw, modelMat));
-    glVertexAttribPointer(4, 4, GL_FLOAT, false, sizeof(SimpleDraw), (void*)offsetof(SimpleDraw, modelMat) + sizeof(vec4));
-    glVertexAttribPointer(5, 4, GL_FLOAT, false, sizeof(SimpleDraw), (void*)offsetof(SimpleDraw, modelMat) + sizeof(vec4) * 2);
-    glVertexAttribPointer(6, 4, GL_FLOAT, false, sizeof(SimpleDraw), (void*)offsetof(SimpleDraw, modelMat) + sizeof(vec4) * 3);
+    glVertexAttribPointer(4, 4, GL_FLOAT, false, sizeof(SimpleDraw), (void*)(offsetof(SimpleDraw, modelMat) + sizeof(vec4)));
+    glVertexAttribPointer(5, 4, GL_FLOAT, false, sizeof(SimpleDraw), (void*)(offsetof(SimpleDraw, modelMat) + sizeof(vec4) * 2));
+    glVertexAttribPointer(6, 4, GL_FLOAT, false, sizeof(SimpleDraw), (void*)(offsetof(SimpleDraw, modelMat) + sizeof(vec4) * 3));
 
     // Make instanced arrays
     glVertexAttribDivisor(2, 1);

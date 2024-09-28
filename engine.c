@@ -17,8 +17,8 @@
 #include "scene.h"
 #include "visual_presenter.h"
 
-#define DEFAULT_WINDOW_WIDTH  1920/1.25
-#define DEFAULT_WINDOW_HEIGHT 1080/1.25
+#define DEFAULT_WINDOW_WIDTH  1920
+#define DEFAULT_WINDOW_HEIGHT 1080
 
 Engine engine;
 FrameArgs frameArgs;
@@ -49,7 +49,7 @@ void initEngine() {
 
     glfwSetErrorCallback(glfw_ErrorCallback);
 
-    glfwInitHint(GLFW_ANGLE_PLATFORM_TYPE, GLFW_ANGLE_PLATFORM_TYPE_METAL);
+    glfwInitHint(GLFW_ANGLE_PLATFORM_TYPE, GLFW_ANGLE_PLATFORM_TYPE_VULKAN);
     if (!glfwInit()) {
         error("Failed to initialize glfw.");
         return;
@@ -58,7 +58,7 @@ void initEngine() {
     glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_EGL_CONTEXT_API);
     glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
     glfwWindowHint(GLFW_SAMPLES, 8);
     GLFWwindow* window = glfwCreateWindow(engine.windowWidth, engine.windowHeight, "cengine", NULL, NULL);
     if (window == NULL) {
